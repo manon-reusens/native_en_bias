@@ -7,6 +7,9 @@ current_dir = os.getcwd()
 sys.path.append(current_dir)
 
 from classification import Accuracy_Runner
+from generation import BertScoreRunner, BleuRunner, RougeRunner
+from generation.bart_score import BartScoreRunner
+
 
 parser = argparse.ArgumentParser(description='Gather scores given the output from chatbots')
 parser.add_argument(
@@ -38,9 +41,26 @@ if __name__ == "__main__":
 
     if args.score=='all' or args.score=='accuracy':
         acc_run=Accuracy_Runner(df,'gpt3.5 replies') #make variable
-        df_acc=acc_run()
+        df=acc_run()
     
-    df_acc.to_parquet(args.output_file)
+    if args.score=='all' or args.score=='bleu':
+        bleurun=BleuRunner(df,'gpt3.5 replies') #make variable
+        df=bleurun()
+
+    if args.score=='all' or args.score=='rouge':
+        rouge_run=RougeRunner(df,'gpt3.5 replies') #make variable
+        df=rouge_run()
+
+    if args.score=='all' or args.score=='bertscore':
+        bert_run=BertScoreRunner(df,'gpt3.5 replies') #make variable
+        df=bert_run()
+
+    if args.score=='all' or args.score=='bartscore':
+        bart_run=BartScoreRunner(df,'gpt3.5 replies') #make variable
+        df=bart_run()
+
+
+    df.to_parquet(args.output_file)
 
     # def gather_results_native_nonnative(self,dataset_id):
     #     df_classresults_corr=self.df[(self.df['dataset_id_x']==dataset_id)& ((df_classresults['level_en']=='C1') | (df_classresults['level_en']=='C2')) & (df_classresults['user_id']>50)]
