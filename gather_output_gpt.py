@@ -90,7 +90,7 @@ if __name__ == "__main__":
     cleaned_reasults_gpt3=[]
     for i in df_final_set.index:
         try:
-            result=gather_answers(i,df_final_set)
+            result=gather_answers(i,df_final_set, model=model)
             df_final_set.at[i,'gpt3.5 replies']=result.choices[0].message.content
             df_final_set.at[i,'gpt3.5 logprobs']=str(result.choices[0].logprobs.content)
             results_full.append(result)
