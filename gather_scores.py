@@ -44,10 +44,12 @@ if __name__ == "__main__":
         df=acc_run()
     
     if args.score=='all' or args.score=='bleu':
+        print('we are now gathering the BLEU scores')
         bleurun=BleuRunner(df,'gpt3.5 replies') #make variable
         df=bleurun()
 
     if args.score=='all' or args.score=='rouge':
+        print('we are now gathering the ROUGE scores')
         rouge_run=RougeRunner(df,'gpt3.5 replies') #make variable
         df=rouge_run()
 
