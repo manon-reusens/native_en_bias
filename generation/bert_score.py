@@ -19,7 +19,7 @@ class BertScoreRunner:
         bertscore = load("bertscore") #to do add the correct dataset ids
         predictions=self.df.loc[(self.df['dataset_id_x']==1) | (self.df['dataset_id_x']==6)|(self.df['dataset_id_x']==7) | (self.df['dataset_id_x']==8)][self.column]
         references=self.df.loc[(self.df['dataset_id_x']==1) | (self.df['dataset_id_x']==6)|(self.df['dataset_id_x']==7) | (self.df['dataset_id_x']==8)]['req_output_x']
-        results = bertscore.compute(predictions=list(predictions), references=list(references), lang="en")
+        results = bertscore.compute(predictions=list(predictions), references=list(references), lang="en", model_type="microsoft/deberta-xlarge-mnli")
 
         indices=self.df.loc[(self.df['dataset_id_x']==1) | (self.df['dataset_id_x']==6)|(self.df['dataset_id_x']==7) | (self.df['dataset_id_x']==8)].index
 
