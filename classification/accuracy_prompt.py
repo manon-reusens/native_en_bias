@@ -66,7 +66,7 @@ class Accuracy_Runner:
                 gold_label=row['req_output_x']
                 if not ('no' in row[self.column].lower() and 'yes' in row[self.column].lower()):
                     self.df.at[index,'accuracy_score_'+self.column]=int(gold_label.lower().replace('.','') in row[self.column].lower())
-                else: print(row['eval'].lower())
+                else: print(row[self.column].lower())
         return self.df
     def check_commonsense(self):
         for index, row in self.df.iterrows():
@@ -81,7 +81,7 @@ class Accuracy_Runner:
                     num_in_text+=1
                 if num_in_text==1:
                     self.df.at[index,'accuracy_score_'+self.column]=int(gold_label in row[self.column])
-                else: print(row['eval'])
+                else: print(row[self.column])
         return self.df
     
 
