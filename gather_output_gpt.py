@@ -72,6 +72,8 @@ if __name__ == "__main__":
 
     if args.set=='10 & 30':
         df_final_set=df_final.loc[(df_final['set_id']==10) | (df_final['set_id']==30)]
+    else:
+        df_final_set=df_final
 
     os.environ['OPENAI_API_KEY']=args.key
 
