@@ -91,6 +91,8 @@ if __name__ == "__main__":
     results_full=[]
     cleaned_reasults_gpt3=[]
     for i in df_final_set.index:
+        if i%200==0:
+            df_final_set.to_parquet(args.output_file)
         try:
             result=gather_answers(i,df_final_set, model=model)
             df_final_set.at[i,args.model+' replies']=result.choices[0].message.content
