@@ -34,29 +34,36 @@ parser.add_argument(
                     type=str,
                     help="Give the full path of where you want to save the output file",
 )
+parser.add_argument(
+                    "--column",
+                    action="store",
+                    type=str,
+                    default='gpt3.5 replies',
+                    help="Give the full path of where you want to save the output file",
+)
 
 if __name__ == "__main__":
     args = parser.parse_args()
     df=pd.read_parquet(args.input_file)
 
     if args.score=='all' or args.score=='accuracy':
-        acc_run=Accuracy_Runner(df,'gpt3.5 replies') #make variable
+        acc_run=Accuracy_Runner(df,args.column) 
         df=acc_run()
     
     if args.score=='all' or args.score=='bleu':
-        bleurun=BleuRunner(df,'gpt3.5 replies') #make variable
+        bleurun=BleuRunner(df,args.column)
         df=bleurun()
 
     if args.score=='all' or args.score=='rouge':
-        rouge_run=RougeRunner(df,'gpt3.5 replies') #make variable
+        rouge_run=RougeRunner(df,args.column)
         df=rouge_run()
 
     if args.score=='all' or args.score=='bertscore':
-        bert_run=BertScoreRunner(df,'gpt3.5 replies') #make variable
+        bert_run=BertScoreRunner(df,args.column)
         df=bert_run()
 
     if args.score=='all' or args.score=='bartscore':
-        bart_run=BartScoreRunner(df,'gpt3.5 replies') #make variable
+        bart_run=BartScoreRunner(df,args.column) 
         df=bart_run()
 
 
