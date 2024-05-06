@@ -47,12 +47,12 @@ import numpy as np
 import time
 
 def gather_answers(index,df,model='mixtral-8x7b-32768'):
-    temperature=temp_dict[df.loc[index]['dataset_id_x']]
+    temperature=temp_dict[df.loc[index]['dataset_id']]
     response = client.chat.completions.create(
         model=model,
         messages=[
         {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": df.loc[index]['task_def_x']},
+        {"role": "user", "content": df.loc[index]['task_def']},
         {"role": "user", "content": df.loc[index]['final_prompt_en']}
         ],
         temperature=temperature,
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     df=pd.read_parquet(args.input_file)
     df_final=df.loc[df['validated']==1]
 
-    df_final['final_prompt_en']=df_final.apply(lambda row: row['instruction_x'].replace('<markprompt>[Your Prompt]</markprompt>.', row['prompt_en']).replace('<markprompt>[Your Prompt]</markprompt>?', row['prompt_en']), axis=1)
+    df_final['final_prompt_en']=df_final.apply(lambda row: row['instruction'].replace('<markprompt>[Your Prompt]</markprompt>.', row['prompt_en']).replace('<markprompt>[Your Prompt]</markprompt>?', row['prompt_en']), axis=1)
     df_final['final_prompt_en']=df_final.apply(lambda row: row['final_prompt_en'].replace('<markprompt>[Your Prompt]</markprompt>', row['prompt_en']), axis=1)
 
     if args.set=='10 & 30':
