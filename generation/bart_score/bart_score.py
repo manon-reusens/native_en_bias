@@ -10,10 +10,10 @@ class BartScoreRunner:
         """
         self.df = df
         self.column=column
-        self.df['full_instruction']=self.df['task_def_x']+' '+self.df['final_prompt_en']
-        self.predictions=self.df.loc[(self.df['dataset_id_x']==1) | (self.df['dataset_id_x']==6)|(self.df['dataset_id_x']==7) | (self.df['dataset_id_x']==8)][self.column]
-        self.references=self.df.loc[(self.df['dataset_id_x']==1) | (self.df['dataset_id_x']==6)|(self.df['dataset_id_x']==7) | (self.df['dataset_id_x']==8)]['req_output_x']
-        self.input=self.df.loc[(self.df['dataset_id_x']==1) | (self.df['dataset_id_x']==6)|(self.df['dataset_id_x']==7) | (self.df['dataset_id_x']==8)]['full_instruction']
+        self.df['full_instruction']=self.df['task_def']+' '+self.df['final_prompt_en']
+        self.predictions=self.df.loc[(self.df['dataset_id']==1) | (self.df['dataset_id']==6)|(self.df['dataset_id']==7) | (self.df['dataset_id']==8)][self.column]
+        self.references=self.df.loc[(self.df['dataset_id']==1) | (self.df['dataset_id']==6)|(self.df['dataset_id']==7) | (self.df['dataset_id']==8)]['req_output']
+        self.input=self.df.loc[(self.df['dataset_id']==1) | (self.df['dataset_id']==6)|(self.df['dataset_id']==7) | (self.df['dataset_id']==8)]['full_instruction']
 
     def __call__(self,batch_size=4):
         bart_scorer = BARTScorer(device='cuda:0', checkpoint='facebook/bart-large-cnn')
@@ -25,7 +25,7 @@ class BartScoreRunner:
         sum=[a+b for a,b in zip(results_precision,results_recall)]
         results_f1=[a/b for a,b in zip(multiplication,sum)]
 
-        indices=self.df.loc[(self.df['dataset_id_x']==1) | (self.df['dataset_id_x']==6)|(self.df['dataset_id_x']==7) | (self.df['dataset_id_x']==8)].index
+        indices=self.df.loc[(self.df['dataset_id']==1) | (self.df['dataset_id']==6)|(self.df['dataset_id']==7) | (self.df['dataset_id']==8)].index
 
         if len(indices) == len(results_precision)== len(results_recall)== len(results_faithful):
             self.df.loc[indices, 'bartscore_faithful'] = results_faithful

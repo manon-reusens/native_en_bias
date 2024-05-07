@@ -77,7 +77,7 @@ if __name__ == "__main__":
     client = Groq(api_key=os.environ.get("GROQ_API_KEY"),)
     df_final_set[args.model+' replies']=np.NaN
     # df_final_set[args.model+' logprobs']=np.NaN
-
+ 
     temp_dict={0:0,1:0.7,2:0,3:0,4:0,5:0,6:0.7,7:0.7,8:0.7,9:0}
     
     results_full=[]

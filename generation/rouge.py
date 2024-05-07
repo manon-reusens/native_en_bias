@@ -14,11 +14,11 @@ class RougeRunner:
     def __call__(self):
         rouge = evaluate.load('rouge')
         
-        predictions=self.df.loc[(self.df['dataset_id_x']==1) | (self.df['dataset_id_x']==6)|(self.df['dataset_id_x']==7) | (self.df['dataset_id_x']==8)][self.column]
-        references=self.df.loc[(self.df['dataset_id_x']==1) | (self.df['dataset_id_x']==6)|(self.df['dataset_id_x']==7) | (self.df['dataset_id_x']==8)]['req_output_x']
+        predictions=self.df.loc[(self.df['dataset_id']==1) | (self.df['dataset_id']==6)|(self.df['dataset_id']==7) | (self.df['dataset_id']==8)][self.column]
+        references=self.df.loc[(self.df['dataset_id']==1) | (self.df['dataset_id']==6)|(self.df['dataset_id']==7) | (self.df['dataset_id']==8)]['req_output']
         results = rouge.compute(predictions=list(predictions), references=list(references), use_aggregator=False)
 
-        indices=self.df.loc[(self.df['dataset_id_x']==1) | (self.df['dataset_id_x']==6)|(self.df['dataset_id_x']==7) | (self.df['dataset_id_x']==8)].index
+        indices=self.df.loc[(self.df['dataset_id']==1) | (self.df['dataset_id']==6)|(self.df['dataset_id']==7) | (self.df['dataset_id']==8)].index
 
         if len(indices) == len(results['rouge1']):
             self.df.loc[indices, 'ROUGE_1'] = results['rouge1']

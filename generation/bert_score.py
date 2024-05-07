@@ -17,11 +17,11 @@ class BertScoreRunner:
         self.column=column
     def __call__(self):
         bertscore = load("bertscore") #to do add the correct dataset ids
-        predictions=self.df.loc[(self.df['dataset_id_x']==1) | (self.df['dataset_id_x']==6)|(self.df['dataset_id_x']==7) | (self.df['dataset_id_x']==8)][self.column]
-        references=self.df.loc[(self.df['dataset_id_x']==1) | (self.df['dataset_id_x']==6)|(self.df['dataset_id_x']==7) | (self.df['dataset_id_x']==8)]['req_output_x']
+        predictions=self.df.loc[(self.df['dataset_id']==1) | (self.df['dataset_id']==6)|(self.df['dataset_id']==7) | (self.df['dataset_id']==8)][self.column]
+        references=self.df.loc[(self.df['dataset_id']==1) | (self.df['dataset_id']==6)|(self.df['dataset_id']==7) | (self.df['dataset_id']==8)]['req_output']
         results = bertscore.compute(predictions=list(predictions), references=list(references), lang="en", model_type="microsoft/deberta-xlarge-mnli")
 
-        indices=self.df.loc[(self.df['dataset_id_x']==1) | (self.df['dataset_id_x']==6)|(self.df['dataset_id_x']==7) | (self.df['dataset_id_x']==8)].index
+        indices=self.df.loc[(self.df['dataset_id']==1) | (self.df['dataset_id']==6)|(self.df['dataset_id']==7) | (self.df['dataset_id']==8)].index
 
         if len(indices) == len(results['precision']):
             self.df.loc[indices, 'bertscore_precision'] = results['precision']

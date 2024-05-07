@@ -32,18 +32,18 @@ class Accuracy_Runner:
 
     def check_amazon_food(self):
         for index, row in self.df.iterrows():
-            if row['dataset_id_x']==3:
+            if row['dataset_id']==3:
                 extracted_number=0
                 for i in re.findall(r'(\d+)',row[self.column]):
                     extracted_number=int(i)+extracted_number
-                gold_label=int(row['req_output_x'])
+                gold_label=int(row['req_output'])
                 self.df.at[index,'accuracy_score_'+self.column]=int(extracted_number==gold_label)
         return self.df
 
     def check_timetravel_sent(self):
         for index, row in self.df.iterrows():
-            if row['dataset_id_x']==2:
-                gold_label=row['req_output_x']
+            if row['dataset_id']==2:
+                gold_label=row['req_output']
                 if not (('option 1' in row[self.column].lower()) and ('option 2' in row[self.column].lower())):
                     self.df.at[index,'accuracy_score_'+self.column]=int(gold_label.lower() in row[self.column].lower())
                 else:self.df.at[index,'accuracy_score_'+self.column]=0
@@ -51,8 +51,8 @@ class Accuracy_Runner:
 
     def check_abductivenli_sent(self):
         for index, row in self.df.iterrows():
-            if row['dataset_id_x']==0:
-                gold_label=row['req_output_x']
+            if row['dataset_id']==0:
+                gold_label=row['req_output']
                 if gold_label==row[self.column]:
                     self.df.at[index,'accuracy_score_'+self.column]=1
                 elif str('middle '+gold_label) in row[self.column].lower() and not ((str('middle 1') in row[self.column].lower()) and (str('middle 2') in row[self.column].lower())):
@@ -62,16 +62,16 @@ class Accuracy_Runner:
         return self.df
     def check_tweetqa_mctaco(self):
         for index, row in self.df.iterrows():
-            if row['dataset_id_x']==5 or row['dataset_id_x']==4 :
-                gold_label=row['req_output_x']
+            if row['dataset_id']==5 or row['dataset_id']==4 :
+                gold_label=row['req_output']
                 if not ('no' in row[self.column].lower() and 'yes' in row[self.column].lower()):
                     self.df.at[index,'accuracy_score_'+self.column]=int(gold_label.lower().replace('.','') in row[self.column].lower())
                 else: print(row[self.column].lower())
         return self.df
     def check_commonsense(self):
         for index, row in self.df.iterrows():
-            if row['dataset_id_x']==9 :
-                gold_label=row['req_output_x']
+            if row['dataset_id']==9 :
+                gold_label=row['req_output']
                 num_in_text=0
                 if 'A' in row[self.column]:
                     num_in_text+=1
