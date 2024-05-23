@@ -6,3 +6,4 @@ groq
 umap
 transformers
 plotly
+anthropic
