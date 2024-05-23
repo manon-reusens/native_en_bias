@@ -3,3 +3,6 @@ rouge-score
 bert_score
 openai
 groq
+umap
+transformers
+plotly
