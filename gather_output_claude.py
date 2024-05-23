@@ -25,7 +25,7 @@ parser.add_argument(
                     type=str,
                     default='haiku',
                     choices=['haiku', 'sonnet','opus'],
-                    help="add the score you want to calculate"
+                    help="add the model you want to use"
 )
 
 parser.add_argument(
