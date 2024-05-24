@@ -131,7 +131,7 @@ if __name__ == "__main__":
     for i in ['native_or_not','strict_native_or_not','western_native_or_not','african_or_not']:
         for value in df_amazon[i].unique():
             max=df_amazon.loc[df_amazon[i]==value]['predicted_score_amazon'].max()
-            df_amazon.loc[df_amazon[i]==value][[i,'predicted_score_amazon']].plot().hist(bins=range(0,max + 1, 1))
+            df_amazon.loc[df_amazon[i]==value][[i,'predicted_score_amazon']].plot().hist(bins=range(0,int(max) + 1, 1))
             plt.savefig(args.output_dir+'/hist_amazonfood_'+value+'.svg')
 
     #create UMAP visualization from the embeddings
