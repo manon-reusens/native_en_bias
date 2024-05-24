@@ -5,5 +5,5 @@ openai
 groq
 umap
 transformers
-plotly
 anthropic
+seaborn

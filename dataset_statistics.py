@@ -3,7 +3,7 @@ import datetime
 from transformers import BertTokenizer,BertModel
 import matplotlib.pyplot as plt
 from umap import UMAP
-import plotly.express as px
+import seaborn as sns
 import torch
 import re
 import argparse
@@ -136,20 +136,22 @@ if __name__ == "__main__":
 
     #create UMAP visualization from the embeddings
     if 'gpt3.5 replies' in df.columns:
-        embeddins=['embeddings_prompt','embeddings_gpt4']
+        embeddings=['embeddings_prompt','embeddings_gpt3']
     elif 'gpt4 replies' in df.columns:
         embeddings=['embeddings_prompt','embeddings_gpt4']
-    for j in ['embeddings_prompt','embeddings_gpt4']:
+    for j in embeddings:
         for i in ['native_or_not','strict_native_or_not','western_native_or_not','african_or_not']:
-            features = df[['embeddings_prompt',i]]
+            embeddings_array = np.stack(df['j'].values)
+            scaler = StandardScaler()
+            embeddings_scaled = scaler.fit_transform(embeddings_array)
 
-            umap_2d = UMAP(n_components=2, init='random', random_state=0)
+            reducer = umap.UMAP(n_neighbors=15, n_components=2, metric='euclidean', random_state=42)
+            embedding_2d = reducer.fit_transform(embeddings_scaled)
 
-            proj_2d = umap_2d.fit_transform(features)
+            df['UMAP-1'] = embedding_2d[:, 0]
+            df['UMAP-2'] = embedding_2d[:, 1]
 
-            fig_2d = px.scatter(
-                proj_2d, x=0, y=1,
-                color=df[i], labels={'color': i}
-            )
-            fig_2d.write_image(args.output_dir+"/umap_"+j+'_'+i+".svg")
-            fig_2d.show()
+            plt.figure(figsize=(12, 10))
+            sns.scatterplot(x='UMAP-1', y='UMAP-2', hue=i, data=df, palette='viridis', s=100, alpha=0.6, legend='full')
+            plt.title('UMAP projection of BERT Embeddings, colored by '+i)
+            plt.show()
