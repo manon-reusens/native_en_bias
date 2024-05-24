@@ -147,7 +147,7 @@ if __name__ == "__main__":
             scaler = StandardScaler()
             embeddings_scaled = scaler.fit_transform(embeddings_array)
 
-            reducer = umap.UMAP(n_neighbors=15, n_components=2, metric='euclidean', random_state=42)
+            reducer = UMAP(n_neighbors=15, n_components=2, metric='euclidean', random_state=42)
             embedding_2d = reducer.fit_transform(embeddings_scaled)
 
             df['UMAP-1'] = embedding_2d[:, 0]
@@ -156,4 +156,5 @@ if __name__ == "__main__":
             plt.figure(figsize=(12, 10))
             sns.scatterplot(x='UMAP-1', y='UMAP-2', hue=i, data=df, palette='viridis', s=100, alpha=0.6, legend='full')
             plt.title('UMAP projection of BERT Embeddings, colored by '+i)
+            plt.savefig(args.output_dir+'umap_projection_bert_'+j+'_'+i+'.svg')
             plt.show()
