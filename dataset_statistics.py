@@ -82,7 +82,7 @@ def get_cls_embeddings(tokenizer, model,text,batch_size=32):
         embeddings.extend(cls_embeddings)
 
     #ensure embeddings are detached from GPU and converted to numpy if running on CUDA
-    embeddings=[e.detach().cpu.numpy() for e in embeddings]
+    embeddings=[e.detach().cpu().numpy() for e in embeddings]
     return embeddings
 
 def annotation_embeddings(df):
