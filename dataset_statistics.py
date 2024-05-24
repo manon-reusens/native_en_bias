@@ -7,6 +7,7 @@ import seaborn as sns
 import torch
 import re
 import argparse
+import numpy as np
 
 parser = argparse.ArgumentParser(description='Gather output from chatbots')
 parser.add_argument(
