@@ -123,7 +123,7 @@ if __name__ == "__main__":
 
     #create word count statistics
         average_word_count_prompt = df.groupby(['dataset_id',group])['word_count_annotation'].mean().reset_index()
-        average_word_count_model = df.groupby(['dataset_id',group])['word_count_generated'].sum().reset_index()
+        average_word_count_model = df.groupby(['dataset_id',group])['word_count_generated'].mean().reset_index()
 
         average_word_count_prompt.to_parquet(args.output_dir+'/average_wordcount_prompt_per_dataset_id_and_'+group+'.parquet')
         average_word_count_model.to_parquet(args.output_dir+'/average_wordcount_model_per_dataset_id_and_'+group+'.parquet')
