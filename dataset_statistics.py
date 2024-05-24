@@ -112,18 +112,19 @@ if __name__ == "__main__":
     df.to_parquet(args.output_dir+'/'+output_file)
 
     #create time statistics
-    average_time_diff = df.groupby(['set_id','native_or_not','strict_native_or_not','western_native_or_not','african_or_not'])['time_diff_capped'].mean().reset_index()
-    sum_time_diff = df.groupby(['set_id','native_or_not','strict_native_or_not','western_native_or_not','african_or_not','african_or_not'])['time_diff_capped'].sum().reset_index()
+    for group in ['native_or_not','strict_native_or_not','western_native_or_not','african_or_not']:
+        average_time_diff = df.groupby(['set_id',group])['time_diff_capped'].mean().reset_index()
+        sum_time_diff = df.groupby(['set_id',group])['time_diff_capped'].sum().reset_index()
 
-    average_time_diff.to_parquet(args.output_dir+'/average_time_per_set_id_and_group.parquet')
-    sum_time_diff.to_parquet(args.output_dir+'/total_time_per_set_id_and_group.parquet')
+        average_time_diff.to_parquet(args.output_dir+'/average_time_per_set_id_and_'+group+'.parquet')
+        sum_time_diff.to_parquet(args.output_dir+'/total_time_per_set_id_and_'+group+'.parquet')
 
     #create word count statistics
-    average_word_count_prompt = df.groupby(['dataset_id','native_or_not','strict_native_or_not','western_native_or_not','african_or_not','african_or_not'])['word_count_annotation'].mean().reset_index()
-    average_word_count_model = df.groupby(['dataset_id','native_or_not','strict_native_or_not','western_native_or_not','african_or_not','african_or_not'])['word_count_generated'].sum().reset_index()
+        average_word_count_prompt = df.groupby(['dataset_id',group])['word_count_annotation'].mean().reset_index()
+        average_word_count_model = df.groupby(['dataset_id',group])['word_count_generated'].sum().reset_index()
 
-    average_word_count_prompt.to_parquet(args.output_dir+'/average_wordcount_prompt_per_dataset_id_and_group.parquet')
-    average_word_count_model.to_parquet(args.output_dir+'/average_wordcount_model_per_dataset_id_and_group.parquet')
+        average_word_count_prompt.to_parquet(args.output_dir+'/average_wordcount_prompt_per_dataset_id_and_'+group+'.parquet')
+        average_word_count_model.to_parquet(args.output_dir+'/average_wordcount_model_per_dataset_id_and_'+group+'.parquet')
 
     #create statistics about distribution AmazonFood
     df_amazon=df.loc[df['dataset_id']==3]
