@@ -1,5 +1,4 @@
 import anthropic
-from anthropic import HUMAN_PROMPT, AI_PROMPT
 import pandas as pd
 import argparse
 import os
@@ -43,6 +42,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
         system="You are a helpful assistant.",
         messages=[
         {"role": "user", "content": df.loc[index]['task_def']},
+        {"role":"assistant","content":'Understood'},
         {"role": "user", "content": df.loc[index]['final_prompt_en']}
         ],
         temperature=temperature,
