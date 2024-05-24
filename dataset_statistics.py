@@ -2,6 +2,7 @@ import pandas as pd
 import datetime
 from transformers import BertTokenizer,BertModel
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
 from umap import UMAP
 import seaborn as sns
 import torch
