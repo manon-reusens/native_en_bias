@@ -142,7 +142,7 @@ if __name__ == "__main__":
         embeddings=['embeddings_prompt','embeddings_gpt4']
     for j in embeddings:
         for i in ['native_or_not','strict_native_or_not','western_native_or_not','african_or_not']:
-            embeddings_array = np.stack(df['j'].values)
+            embeddings_array = np.stack(df[j].values)
             scaler = StandardScaler()
             embeddings_scaled = scaler.fit_transform(embeddings_array)
 
