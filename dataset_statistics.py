@@ -109,21 +109,21 @@ if __name__ == "__main__":
         output_file='statistics_gpt3.5_replies.parquet' 
     elif 'gpt4 replies' in df.columns:
         output_file='statistics_gpt4_replies.parquet' 
-    df.to_parquet(args.ouput_dir+'/'+output_file)
+    df.to_parquet(args.output_dir+'/'+output_file)
 
     #create time statistics
     average_time_diff = df.groupby(['set_id','native_or_not','strict_native_or_not','western_native_or_not','african_or_not'])['time_diff_capped'].mean()
     sum_time_diff = df.groupby(['set_id','native_or_not','strict_native_or_not','western_native_or_not','african_or_not','african_or_not'])['time_diff_capped'].sum()
 
-    average_time_diff.to_parquet(args.ouput_dir+'/average_time_per_set_id_and_group.parquet')
-    sum_time_diff.to_parquet(args.ouput_dir+'/total_time_per_set_id_and_group.parquet')
+    average_time_diff.to_parquet(args.output_dir+'/average_time_per_set_id_and_group.parquet')
+    sum_time_diff.to_parquet(args.output_dir+'/total_time_per_set_id_and_group.parquet')
 
     #create word count statistics
     average_word_count_prompt = df.groupby(['dataset_id','native_or_not','strict_native_or_not','western_native_or_not','african_or_not','african_or_not'])['word_count_annotation'].mean()
     average_word_count_model = df.groupby(['dataset_id','native_or_not','strict_native_or_not','western_native_or_not','african_or_not','african_or_not'])['word_count_generated'].sum()
 
-    average_word_count_prompt.to_parquet(args.ouput_dir+'/average_wordcount_prompt_per_dataset_id_and_group.parquet')
-    average_word_count_model.to_parquet(args.ouput_dir+'/average_wordcount_model_per_dataset_id_and_group.parquet')
+    average_word_count_prompt.to_parquet(args.output_dir+'/average_wordcount_prompt_per_dataset_id_and_group.parquet')
+    average_word_count_model.to_parquet(args.output_dir+'/average_wordcount_model_per_dataset_id_and_group.parquet')
 
     #create statistics about distribution AmazonFood
     df_amazon=df.loc[df['dataset_id']==3]
@@ -131,7 +131,7 @@ if __name__ == "__main__":
         for value in df_amazon[i].unique:
             max=df_amazon.loc[df_amazon[i]==value]['predicted_score_amazon'].max()
             df_amazon.loc[df_amazon[i]==value][[i,'predicted_score_amazon']].plot().hist(bins=range(0,max + 1, 1))
-            plt.savefig(args.ouput_dir+'/hist_amazonfood_'+value+'.svg')
+            plt.savefig(args.output_dir+'/hist_amazonfood_'+value+'.svg')
 
     #create UMAP visualization from the embeddings
     if 'gpt3.5 replies' in df.columns:
@@ -150,5 +150,5 @@ if __name__ == "__main__":
                 proj_2d, x=0, y=1,
                 color=df[i], labels={'color': i}
             )
-            fig_2d.write_image(args.ouput_dir+"/umap_"+j+'_'+i+".svg")
+            fig_2d.write_image(args.output_dir+"/umap_"+j+'_'+i+".svg")
             fig_2d.show()
