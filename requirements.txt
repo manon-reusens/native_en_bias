@@ -7,3 +7,4 @@ umap
 transformers
 anthropic
 seaborn
+google-generativeai
