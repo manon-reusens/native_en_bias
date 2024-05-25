@@ -157,6 +157,6 @@ if __name__ == "__main__":
 
                 plt.figure(figsize=(12, 10))
                 sns.scatterplot(x='UMAP-1', y='UMAP-2', hue=i, data=df_subset, palette='viridis', s=100, alpha=0.6, legend='full')
-                plt.title('UMAP projection of BERT Embeddings, colored by '+i+'dataset '+dataset)
+                plt.title('UMAP projection of BERT Embeddings, colored by '+i+'dataset '+str(dataset))
                 plt.savefig(args.output_dir+'/umap_projection_bert_'+j+'_'+i+dataset+'.svg')
                 plt.show()
