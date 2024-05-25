@@ -115,8 +115,8 @@ if __name__ == "__main__":
 
     #create time statistics
     for group in ['native_or_not','strict_native_or_not','western_native_or_not','african_or_not']:
-        average_time_diff = df.groupby(['set_id',group])['time_diff_capped'].mean().reset_index()
-        sum_time_diff = df.groupby(['set_id',group])['time_diff_capped'].sum().reset_index()
+        average_time_diff = df.groupby(['set_id',group])['time_diff_capped'].mean().dt.total_seconds().reset_index()
+        sum_time_diff = df.groupby(['set_id',group])['time_diff_capped'].sum().dt.total_seconds().reset_index()
 
         average_time_diff.to_parquet(args.output_dir+'/average_time_per_set_id_and_'+group+'.parquet')
         sum_time_diff.to_parquet(args.output_dir+'/total_time_per_set_id_and_'+group+'.parquet')
@@ -132,8 +132,8 @@ if __name__ == "__main__":
     df_amazon=df.loc[df['dataset_id']==3]
     for i in ['native_or_not','strict_native_or_not','western_native_or_not','african_or_not']:
         for value in df_amazon[i].unique():
-            max=df_amazon.loc[df_amazon[i]==value]['predicted_score_amazon'].max()
-            df_amazon.loc[df_amazon[i]==value][[i,'predicted_score_amazon']].hist(bins=range(0,int(max) + 1, 1))
+            # max=df_amazon.loc[df_amazon[i]==value]['predicted_score_amazon'].max()
+            df_amazon.loc[df_amazon[i]==value][[i,'predicted_score_amazon']].hist(bins=range(0,6, 1))
             plt.savefig(args.output_dir+'/hist_amazonfood_'+value+'.svg')
 
     #create UMAP visualization from the embeddings
@@ -143,18 +143,20 @@ if __name__ == "__main__":
         embeddings=['embeddings_prompt','embeddings_gpt4']
     for j in embeddings:
         for i in ['native_or_not','strict_native_or_not','western_native_or_not','african_or_not']:
-            embeddings_array = np.stack(df[j].values)
-            scaler = StandardScaler()
-            embeddings_scaled = scaler.fit_transform(embeddings_array)
+            for dataset in df['dataset_id'].unique():
+                df_subset=df.loc[df['dataset_id']==dataset]
+                embeddings_array = np.stack(df_subset[j].values)
+                scaler = StandardScaler()
+                embeddings_scaled = scaler.fit_transform(embeddings_array)
 
-            reducer = UMAP(n_neighbors=15, n_components=2, metric='euclidean', random_state=42)
-            embedding_2d = reducer.fit_transform(embeddings_scaled)
+                reducer = UMAP(n_neighbors=15, n_components=2, metric='euclidean', random_state=42)
+                embedding_2d = reducer.fit_transform(embeddings_scaled)
 
-            df['UMAP-1'] = embedding_2d[:, 0]
-            df['UMAP-2'] = embedding_2d[:, 1]
+                df_subset['UMAP-1'] = embedding_2d[:, 0]
+                df_subset['UMAP-2'] = embedding_2d[:, 1]
 
-            plt.figure(figsize=(12, 10))
-            sns.scatterplot(x='UMAP-1', y='UMAP-2', hue=i, data=df, palette='viridis', s=100, alpha=0.6, legend='full')
-            plt.title('UMAP projection of BERT Embeddings, colored by '+i)
-            plt.savefig(args.output_dir+'/umap_projection_bert_'+j+'_'+i+'.svg')
-            plt.show()
+                plt.figure(figsize=(12, 10))
+                sns.scatterplot(x='UMAP-1', y='UMAP-2', hue=i, data=df_subset, palette='viridis', s=100, alpha=0.6, legend='full')
+                plt.title('UMAP projection of BERT Embeddings, colored by '+i+'dataset '+dataset)
+                plt.savefig(args.output_dir+'/umap_projection_bert_'+j+'_'+i+dataset+'.svg')
+                plt.show()
