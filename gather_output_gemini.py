@@ -81,7 +81,7 @@ if __name__ == "__main__":
             df_final.to_parquet(args.output_file)
         try:
             result=gather_answers(i,df_final, model=model)
-            df_final.at[i,args.model+' replies']=result.text
+            df_final.at[i,args.model+' replies']=str(result.text)
             # df_final.at[i,args.model+' logprobs']=str(result.choices[0].logprobs.content)
             results_full.append(result)
             cleaned_reasults.append(result.text)
