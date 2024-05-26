@@ -116,7 +116,7 @@ if __name__ == "__main__":
     #create time statistics
     for group in ['native_or_not','strict_native_or_not','western_native_or_not','african_or_not']:
         average_time_diff = df.groupby(['set_id',group])['time_diff_capped'].mean().dt.total_seconds().reset_index()
-        sum_time_diff = df.groupby(['set_id','user_id',group]).sum(numeric_only=True).groupby(['set_id',group])['time_diff_capped'].mean().dt.total_seconds().reset_index()
+        sum_time_diff = df.groupby(['set_id','user_id',group])['time_diff_capped'].sum().groupby(['set_id',group]).mean().dt.total_seconds().reset_index()
 
         average_time_diff.to_parquet(args.output_dir+'/average_time_per_set_id_and_'+group+'.parquet')
         sum_time_diff.to_parquet(args.output_dir+'/total_time_per_set_id_and_'+group+'.parquet')
