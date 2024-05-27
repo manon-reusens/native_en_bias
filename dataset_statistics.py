@@ -23,6 +23,13 @@ parser.add_argument(
                     type=str,
                     help="Give the full path to the output directory",
 )
+parser.add_argument(
+                    "--column",
+                    action="store",
+                    type=str,
+                    help="Give the full path to the output directory",
+)
+
 
 def add_time(df,maxmin=10):
     """
@@ -42,17 +49,11 @@ def add_time(df,maxmin=10):
 
 def count_words(df):
     df['word_count_annotation']=df['prompt_en'].str.split().apply(len)
-    if 'gpt3.5 replies' in df.columns:
-        df['word_count_generated']=df['gpt3.5 replies'].str.split().apply(len)
-    elif 'gpt4 replies' in df.columns:
-        df['word_count_generated']=df['gpt4 replies'].str.split().apply(len)
+    df['word_count_generated']=df[args.column].str.split().apply(len)
     return df
 
 def amazon_food(df):
-    if 'gpt3.5 replies' in df.columns:
-        column='gpt3.5 replies'
-    if 'gpt4 replies' in df.columns:
-        column='gpt4 replies'
+    column=args.column
     for index, row in df.iterrows():
         if row['dataset_id']==3:
             extracted_number=0
@@ -92,10 +93,8 @@ def annotation_embeddings(df):
     model = BertModel.from_pretrained('bert-base-uncased')
     model.eval()
     df['embeddings_prompt']=get_cls_embeddings(tokenizer, model,df['prompt_en'].to_list())
-    if 'gpt3.5 replies' in df.columns:
-        df['embeddings_gpt3']=get_cls_embeddings(tokenizer, model,df['gpt3.5 replies'].to_list())
-    elif 'gpt4 replies' in df.columns:
-        df['embeddings_gpt4']=get_cls_embeddings(tokenizer, model,df['gpt4 replies'].to_list())
+    col_to_store=args.column.replace(' replies','')
+    df['embeddings_'+col_to_store]=get_cls_embeddings(tokenizer, model,df[args.column].to_list())
     return df
 
 if __name__ == "__main__":
@@ -107,10 +106,8 @@ if __name__ == "__main__":
     df=make_groups(df)
     df=annotation_embeddings(df)
 
-    if 'gpt3.5 replies' in df.columns:
-        output_file='statistics_gpt3.5_replies.parquet' 
-    elif 'gpt4 replies' in df.columns:
-        output_file='statistics_gpt4_replies.parquet' 
+    save=args.column.replace(' replies','')
+    output_file='statistics_'+save+'.parquet' 
     df.to_parquet(args.output_dir+'/'+output_file)
 
     #create time statistics
@@ -137,10 +134,8 @@ if __name__ == "__main__":
             plt.savefig(args.output_dir+'/hist_amazonfood_'+value+'.svg')
 
     #create UMAP visualization from the embeddings
-    if 'gpt3.5 replies' in df.columns:
-        embeddings=['embeddings_prompt','embeddings_gpt3']
-    elif 'gpt4 replies' in df.columns:
-        embeddings=['embeddings_prompt','embeddings_gpt4']
+    col_to_store=args.column.replace(' replies','')
+    embeddings=['embeddings_prompt','embeddings_'+col_to_store]
     for j in embeddings:
         for i in ['native_or_not','strict_native_or_not','western_native_or_not','african_or_not']:
             for dataset in df['dataset_id'].unique():
