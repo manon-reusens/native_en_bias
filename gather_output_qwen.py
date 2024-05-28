@@ -35,8 +35,10 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
                 {"role":"user", "content":prompt}]
     text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
     model_inputs = tokenizer([text], return_tensors="pt").to(device)
-
-    generated_ids = model.generate(model_inputs.input_ids, max_new_tokens=4096, do_sample=True,temperature=temperature)
+    if temperature==0:
+        generated_ids = model.generate(model_inputs.input_ids, max_new_tokens=4096, do_sample=False)
+    else:
+        generated_ids = model.generate(model_inputs.input_ids, max_new_tokens=4096, do_sample=True,temperature=temperature)
 
     generated_ids = [output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)]
 
