@@ -12,12 +12,6 @@ parser.add_argument(
                     help="Give the full path to the input file",
 )
 parser.add_argument(
-                    '--key',
-                    action='store',
-                    type=str,
-                    help='give the API key')
-
-parser.add_argument(
                     "--model",
                     action="store",
                     type=str,
