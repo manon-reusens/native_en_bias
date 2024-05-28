@@ -1,5 +1,6 @@
 import pandas as pd
 import argparse
+import numpy as np
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers import Qwen2Model, Qwen2Config
 
