@@ -1,8 +1,11 @@
 import pandas as pd
 import argparse
 import numpy as np
+import os
+os.environ['TRANSFORMERS_CACHE']='/scratch/leuven/344/vsc34470/cache/'
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers import Qwen2Model, Qwen2Config
+
 
 parser = argparse.ArgumentParser(description='Gather output from chatbots')
 parser.add_argument(
@@ -36,8 +39,13 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
     text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
     model_inputs = tokenizer([text], return_tensors="pt").to(device)
     if temperature==0:
+        model.generation_config.top_p=None
+        model.generation_config.temperature=None
+        model.generation_config.top_k=None
         generated_ids = model.generate(model_inputs.input_ids, max_new_tokens=4096, do_sample=False)
     else:
+        model.generation_config.top_p=0.8
+        model.generation_config.top_k=20
         generated_ids = model.generate(model_inputs.input_ids, max_new_tokens=4096, do_sample=True,temperature=temperature)
 
     generated_ids = [output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)]
@@ -56,8 +64,8 @@ if __name__ == "__main__":
     df_final['final_prompt_en']=df_final.apply(lambda row: row['final_prompt_en'].replace('<markprompt>[Your Prompt]</markprompt>', row['prompt_en']), axis=1)
 
     temp_dict={0:0,1:0.7,2:0,3:0,4:0,5:0,6:0.7,7:0.7,8:0.7,9:0}
-    df_final[args.model+' replies']=np.NaN
-    df_final[args.model+' logprobs']=np.NaN
+    df_final[args.model+' replies']=None
+    df_final[args.model+' logprobs']=None
     
     model = AutoModelForCausalLM.from_pretrained("Qwen/"+args.model, device_map="auto")
     tokenizer = AutoTokenizer.from_pretrained("Qwen/"+args.model)
@@ -67,11 +75,11 @@ if __name__ == "__main__":
     for i in df_final.index:
         if i%200==0:
             df_final.to_parquet(args.output_file)
-            result=gather_answers(i,df_final, model=model)
-            df_final.at[i,args.model+' replies']=result
-            # df_final.at[i,args.model+' logprobs']=str(result.choices[0].logprobs.content)
-            results_full.append(result)
-            cleaned_reasults.append(result)
+        result=gather_answers(i,df_final, model=model)
+        df_final.at[i,args.model+' replies']=str(result)
+        # df_final.at[i,args.model+' logprobs']=str(result.choices[0].logprobs.content)
+        results_full.append(result)
+        cleaned_reasults.append(result)
 
     df_final.to_parquet(args.output_file)
 
