@@ -4,6 +4,7 @@ import argparse
 import os
 import numpy as np
 import time
+from google.generativeai.types import HarmCategory, HarmBlockThreshold,generation_types
 
 parser = argparse.ArgumentParser(description='Gather output from chatbots')
 parser.add_argument(
@@ -36,12 +37,19 @@ parser.add_argument(
 
 
 def gather_answers(index,df,model='gemini-1.5-flash'):
+    
     temperature=temp_dict[df.loc[index]['dataset_id']]
     model = genai.GenerativeModel(model,system_instruction="You are a helpful assistant.",generation_config=genai.types.GenerationConfig(
                                 # Only one candidate for now.
                                 candidate_count=1,
                                 temperature=temperature,
-                                max_output_tokens=4096))
+                                max_output_tokens=4096),
+                                safety_settings={
+        HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+        HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+        HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+        HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+    })
     chat=model.start_chat(history=[
         {
             'role': 'user',
@@ -64,8 +72,8 @@ if __name__ == "__main__":
     df_final['final_prompt_en']=df_final.apply(lambda row: row['final_prompt_en'].replace('<markprompt>[Your Prompt]</markprompt>', row['prompt_en']), axis=1)
 
     genai.configure(api_key=args.key)
-    df_final[args.model+' replies']=np.NaN
-    df_final[args.model+' logprobs']=np.NaN
+    #df_final[args.model+' replies']=None
+    #df_final[args.model+' logprobs']=None
 
     temp_dict={0:0,1:0.7,2:0,3:0,4:0,5:0,6:0.7,7:0.7,8:0.7,9:0}
 
@@ -79,15 +87,18 @@ if __name__ == "__main__":
     for i in df_final.index:
         if i%200==0:
             df_final.to_parquet(args.output_file)
-        try:
-            result=gather_answers(i,df_final, model=model)
-            df_final.at[i,args.model+' replies']=str(result.text)
-            # df_final.at[i,args.model+' logprobs']=str(result.choices[0].logprobs.content)
-            results_full.append(result)
-            cleaned_reasults.append(result.text)
-        except:
-            print('we are going to sleep for a while')
-            time.sleep(5)
+        if df_final.loc[i][args.model+' replies']==None:
+            try:
+                result=gather_answers(i,df_final, model=model)
+                df_final.at[i,args.model+' replies']=str(result.text)
+                # df_final.at[i,args.model+' logprobs']=str(result.choices[0].logprobs.content)
+                results_full.append(result)
+                cleaned_reasults.append(result.text)
+                time.sleep(8)
+            except generation_types.StopCandidateException:
+                print(df_final.loc[i]['prompt_en'])
+                print('we are going to sleep for a while')
+                time.sleep(5)
 
     df_final.to_parquet(args.output_file)
 
