@@ -33,9 +33,14 @@ parser.add_argument(
 def gather_answers(index,df,model='gpt-3.5-turbo'):
     temperature=temp_dict[df.loc[index]['dataset_id']]
     prompt = df.loc[index]['final_prompt_en']
-    messages = [{"role":"system","content":"You are a helpful assistant."},
-                {"role": "user", "content": df.loc[index]['task_def']}, {"role":"assistant","content":'Understood'},
+    if df.loc[index]['dataset_id']==3:
+            messages = [{"role":"system","content":"You are a helpful assistant."},
+                {"role": "user", "content": df.loc[index]['task_def']+ ' Only respond by giving the rating, do not provide other information.'}, {"role":"assistant","content":'Understood'},
                 {"role":"user", "content":prompt}]
+    else:
+        messages = [{"role":"system","content":"You are a helpful assistant."},
+                    {"role": "user", "content": df.loc[index]['task_def']}, {"role":"assistant","content":'Understood'},
+                    {"role":"user", "content":prompt}]
     text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
     model_inputs = tokenizer([text], return_tensors="pt").to(device)
     if temperature==0:

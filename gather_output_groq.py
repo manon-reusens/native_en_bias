@@ -48,15 +48,28 @@ import time
 
 def gather_answers(index,df,model='mixtral-8x7b-32768'):
     temperature=temp_dict[df.loc[index]['dataset_id']]
-    response = client.chat.completions.create(
-        model=model,
-        messages=[
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": df.loc[index]['task_def']},
-        {"role": "user", "content": df.loc[index]['final_prompt_en']}
-        ],
-        temperature=temperature,
-    )
+    if df.loc[index]['dataset_id']==3:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": df.loc[index]['task_def']+ ' Only respond by giving the rating, do not provide other information.'},
+            {"role":'assistant',"content":'Understood'},
+            {"role": "user", "content": df.loc[index]['final_prompt_en']}
+            ],
+            temperature=temperature,
+        )
+    else:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": df.loc[index]['task_def']},
+            {"role":'assistant',"content":'Understood'},
+            {"role": "user", "content": df.loc[index]['final_prompt_en']}
+            ],
+            temperature=temperature,
+        )
     return response
 
 if __name__ == "__main__":

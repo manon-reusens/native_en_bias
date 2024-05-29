@@ -48,18 +48,34 @@ import time
 
 def gather_answers(index,df,model='gpt-3.5-turbo'):
     temperature=temp_dict[df.loc[index]['dataset_id']]
-    response = client.chat.completions.create(
-        model=model,
-        messages=[
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": df.loc[index]['task_def']},
-        {"role": "user", "content": df.loc[index]['final_prompt_en']}
-        ],
-        temperature=temperature,
-        logprobs=True,
-        top_logprobs=5,
-        seed=42
-    )
+    if df.loc[index]['dataset_id']==3:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": df.loc[index]['task_def']+ ' Only respond by giving the rating, do not provide other information.'},
+            {"role":'assistant',"content":'Understood'},
+            {"role": "user", "content": df.loc[index]['final_prompt_en']}
+            ],
+            temperature=temperature,
+            logprobs=True,
+            top_logprobs=5,
+            seed=42
+        )
+    else:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": df.loc[index]['task_def']},
+            {"role":'assistant',"content":'Understood'},
+            {"role": "user", "content": df.loc[index]['final_prompt_en']}
+            ],
+            temperature=temperature,
+            logprobs=True,
+            top_logprobs=5,
+            seed=42
+        )
     return response
 
 if __name__ == "__main__":

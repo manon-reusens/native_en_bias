@@ -50,16 +50,28 @@ def gather_answers(index,df,model='gemini-1.5-flash'):
         HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
         HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
     })
-    chat=model.start_chat(history=[
-        {
-            'role': 'user',
-            'parts': [df.loc[index]['task_def']]
-        },
-        {
-            'role': 'model',
-            'parts': ['Understood'],
-        },
-    ]) 
+    if df.loc[index]['dataset_id']==3:
+                chat=model.start_chat(history=[
+            {
+                'role': 'user',
+                'parts': [df.loc[index]['task_def']+ ' Only respond by giving the rating, do not provide other information.']
+            },
+            {
+                'role': 'model',
+                'parts': ['Understood'],
+            },
+        ]) 
+    else:
+        chat=model.start_chat(history=[
+            {
+                'role': 'user',
+                'parts': [df.loc[index]['task_def']]
+            },
+            {
+                'role': 'model',
+                'parts': ['Understood'],
+            },
+        ]) 
     response=chat.send_message(df.loc[index]['final_prompt_en'])
     return response
 

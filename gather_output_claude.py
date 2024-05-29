@@ -37,17 +37,30 @@ parser.add_argument(
 
 def gather_answers(index,df,model='gpt-3.5-turbo'):
     temperature=temp_dict[df.loc[index]['dataset_id']]
-    response = client.messages.create(
-        model=model,
-        system="You are a helpful assistant.",
-        messages=[
-        {"role": "user", "content": df.loc[index]['task_def']},
-        {"role":"assistant","content":'Understood'},
-        {"role": "user", "content": df.loc[index]['final_prompt_en']}
-        ],
-        temperature=temperature,
-        max_tokens=4096
-    )
+    if df.loc[index]['dataset_id']==3:
+        response = client.messages.create(
+            model=model,
+            system="You are a helpful assistant.",
+            messages=[
+            {"role": "user", "content": df.loc[index]['task_def']+ ' Only respond by giving the rating, do not provide other information.'},
+            {"role":"assistant","content":'Understood'},
+            {"role": "user", "content": df.loc[index]['final_prompt_en']}
+            ],
+            temperature=temperature,
+            max_tokens=4096
+        )
+    else:
+        response = client.messages.create(
+            model=model,
+            system="You are a helpful assistant.",
+            messages=[
+            {"role": "user", "content": df.loc[index]['task_def']},
+            {"role":"assistant","content":'Understood'},
+            {"role": "user", "content": df.loc[index]['final_prompt_en']}
+            ],
+            temperature=temperature,
+            max_tokens=4096
+        )
     return response
 
 if __name__ == "__main__":
