@@ -53,7 +53,51 @@ def gather_answers(index,df,model='mixtral-8x7b-32768'):
             model=model,
             messages=[
             {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": df.loc[index]['task_def']+ ' Only respond by giving the rating, do not provide other information.'},
+            {"role": "user", "content": df.loc[index]['task_def']+ ' Only respond by giving the rating.'},
+            {"role":'assistant',"content":'Understood'},
+            {"role": "user", "content": df.loc[index]['final_prompt_en']}
+            ],
+            temperature=temperature,
+        )
+    elif df.loc[index]['dataset_id']==1:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": df.loc[index]['task_def']+ ' Only respond with the predicted last sentence.'},
+            {"role":'assistant',"content":'Understood'},
+            {"role": "user", "content": df.loc[index]['final_prompt_en']}
+            ],
+            temperature=temperature,
+        )
+    elif df.loc[index]['dataset_id']==6:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": df.loc[index]['task_def']+ ' Only respond with the news article.'},
+            {"role":'assistant',"content":'Understood'},
+            {"role": "user", "content": df.loc[index]['final_prompt_en']}
+            ],
+            temperature=temperature,
+        )
+    elif df.loc[index]['dataset_id']==7:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": df.loc[index]['task_def']+ ' Only respond with the paragraph.'},
+            {"role":'assistant',"content":'Understood'},
+            {"role": "user", "content": df.loc[index]['final_prompt_en']}
+            ],
+            temperature=temperature,
+        )
+    elif df.loc[index]['dataset_id']==8:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": df.loc[index]['task_def']+ ' Only respond with the paraphrased sentence.'},
             {"role":'assistant',"content":'Understood'},
             {"role": "user", "content": df.loc[index]['final_prompt_en']}
             ],

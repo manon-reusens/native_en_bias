@@ -53,7 +53,63 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             model=model,
             messages=[
             {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": df.loc[index]['task_def']+ ' Only respond by giving the rating, do not provide other information.'},
+            {"role": "user", "content": df.loc[index]['task_def']+ ' Only respond with the rating.'},
+            {"role":'assistant',"content":'Understood'},
+            {"role": "user", "content": df.loc[index]['final_prompt_en']}
+            ],
+            temperature=temperature,
+            logprobs=True,
+            top_logprobs=5,
+            seed=42
+        )
+    elif df.loc[index]['dataset_id']==1:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": df.loc[index]['task_def']+  ' Only respond with the predicted last sentence.'},
+            {"role":'assistant',"content":'Understood'},
+            {"role": "user", "content": df.loc[index]['final_prompt_en']}
+            ],
+            temperature=temperature,
+            logprobs=True,
+            top_logprobs=5,
+            seed=42
+        )
+    elif df.loc[index]['dataset_id']==6:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": df.loc[index]['task_def']+ ' Only respond with the news article.'},
+            {"role":'assistant',"content":'Understood'},
+            {"role": "user", "content": df.loc[index]['final_prompt_en']}
+            ],
+            temperature=temperature,
+            logprobs=True,
+            top_logprobs=5,
+            seed=42
+        )
+    elif df.loc[index]['dataset_id']==7:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": df.loc[index]['task_def']+ '  Only respond with the paragraph.'},
+            {"role":'assistant',"content":'Understood'},
+            {"role": "user", "content": df.loc[index]['final_prompt_en']}
+            ],
+            temperature=temperature,
+            logprobs=True,
+            top_logprobs=5,
+            seed=42
+        )
+    elif df.loc[index]['dataset_id']==8:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": df.loc[index]['task_def']+ ' Only respond with the paraphrased sentence.'},
             {"role":'assistant',"content":'Understood'},
             {"role": "user", "content": df.loc[index]['final_prompt_en']}
             ],

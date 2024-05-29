@@ -54,13 +54,57 @@ def gather_answers(index,df,model='gemini-1.5-flash'):
                 chat=model.start_chat(history=[
             {
                 'role': 'user',
-                'parts': [df.loc[index]['task_def']+ ' Only respond by giving the rating, do not provide other information.']
+                'parts': [df.loc[index]['task_def']+ ' Only respond with the rating.']
             },
             {
                 'role': 'model',
                 'parts': ['Understood'],
             },
         ]) 
+    elif df.loc[index]['dataset_id']==1:
+                chat=model.start_chat(history=[
+            {
+                'role': 'user',
+                'parts': [df.loc[index]['task_def']+ ' Only respond with the predicted last sentence.']
+            },
+            {
+                'role': 'model',
+                'parts': ['Understood'],
+            },
+        ])
+    elif df.loc[index]['dataset_id']==6:
+                chat=model.start_chat(history=[
+            {
+                'role': 'user',
+                'parts': [df.loc[index]['task_def']+ ' Only respond with the news article.']
+            },
+            {
+                'role': 'model',
+                'parts': ['Understood'],
+            },
+        ])
+    elif df.loc[index]['dataset_id']==7:
+                chat=model.start_chat(history=[
+            {
+                'role': 'user',
+                'parts': [df.loc[index]['task_def']+ ' Only respond with the paragraph.']
+            },
+            {
+                'role': 'model',
+                'parts': ['Understood'],
+            },
+        ])
+    elif df.loc[index]['dataset_id']==8:
+                chat=model.start_chat(history=[
+            {
+                'role': 'user',
+                'parts': [df.loc[index]['task_def']+ ' Only respond with the paraphrased sentence.']
+            },
+            {
+                'role': 'model',
+                'parts': ['Understood'],
+            },
+        ])
     else:
         chat=model.start_chat(history=[
             {

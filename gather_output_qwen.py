@@ -35,7 +35,23 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
     prompt = df.loc[index]['final_prompt_en']
     if df.loc[index]['dataset_id']==3:
             messages = [{"role":"system","content":"You are a helpful assistant."},
-                {"role": "user", "content": df.loc[index]['task_def']+ ' Only respond by giving the rating, do not provide other information.'}, {"role":"assistant","content":'Understood'},
+                {"role": "user", "content": df.loc[index]['task_def']+ ' Only respond with the rating.'}, {"role":"assistant","content":'Understood'},
+                {"role":"user", "content":prompt}]
+    elif df.loc[index]['dataset_id']==1:
+            messages = [{"role":"system","content":"You are a helpful assistant."},
+                {"role": "user", "content": df.loc[index]['task_def']+' Only respond with the predicted last sentence.'}, {"role":"assistant","content":'Understood'},
+                {"role":"user", "content":prompt}]
+    elif df.loc[index]['dataset_id']==6:
+            messages = [{"role":"system","content":"You are a helpful assistant."},
+                {"role": "user", "content": df.loc[index]['task_def']+' Only respond with the news article.'}, {"role":"assistant","content":'Understood'},
+                {"role":"user", "content":prompt}]
+    elif df.loc[index]['dataset_id']==7:
+            messages = [{"role":"system","content":"You are a helpful assistant."},
+                {"role": "user", "content": df.loc[index]['task_def']+' Only respond with the paragraph.'}, {"role":"assistant","content":'Understood'},
+                {"role":"user", "content":prompt}]
+    elif df.loc[index]['dataset_id']==8:
+            messages = [{"role":"system","content":"You are a helpful assistant."},
+                {"role": "user", "content": df.loc[index]['task_def']+' Only respond with the paraphrased sentence.'}, {"role":"assistant","content":'Understood'},
                 {"role":"user", "content":prompt}]
     else:
         messages = [{"role":"system","content":"You are a helpful assistant."},
