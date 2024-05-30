@@ -41,7 +41,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
         task_def=df.loc[index]['task_def']+ ' Only respond with the rating.'
     elif df.loc[index]['dataset_id']==1:
         task_def=df.loc[index]['task_def']+  ' Only respond with the predicted last sentence.'
-    elif df.loc[index]['dataset_id']==5:
+    elif (df.loc[index]['dataset_id']==5 ) or (df.loc[index]['dataset_id']==4):
          task_def=df.loc[index]['task_def']+  ' Only respond with "yes" or "no".'
     elif df.loc[index]['dataset_id']==6:
         task_def=df.loc[index]['task_def']+ ' Only respond with the news article.'
