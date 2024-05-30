@@ -34,7 +34,7 @@ parser.add_argument(
                     action="store",
                     type=str,
                     default='standard',
-                    choices=['standard','add_corr_native','guess_native','reformulate'],
+                    choices=['standard','add_all_native','add_all_non_native','guess_native','reformulate'],
                     help="Give the full path of where you want to save the output file",
 )
 
