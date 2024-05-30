@@ -51,6 +51,8 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
         task_def=df.loc[index]['task_def']+ '  Only respond with the paragraph.'
     elif df.loc[index]['dataset_id']==8:
         task_def=df.loc[index]['task_def']+ ' Only respond with the paraphrased sentence.'
+    elif df.loc[index]['dataset_id']==9:
+        task_def=df.loc[index]['task_def']+ ' Only respond with the letter indicating the most corresponding reason.'
     else:
         task_def=df.loc[index]['task_def']
 

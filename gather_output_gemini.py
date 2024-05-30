@@ -51,71 +51,30 @@ def gather_answers(index,df,model='gemini-1.5-flash'):
         HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
     })
     if df.loc[index]['dataset_id']==3:
-                chat=model.start_chat(history=[
-            {
-                'role': 'user',
-                'parts': [df.loc[index]['task_def']+ ' Only respond with the rating.']
-            },
-            {
-                'role': 'model',
-                'parts': ['Understood'],
-            },
-        ]) 
+        task_def=df.loc[index]['task_def']+ ' Only respond with the rating.'
     elif df.loc[index]['dataset_id']==1:
-                chat=model.start_chat(history=[
-            {
-                'role': 'user',
-                'parts': [df.loc[index]['task_def']+ ' Only respond with the predicted last sentence.']
-            },
-            {
-                'role': 'model',
-                'parts': ['Understood'],
-            },
-        ])
+        task_def=df.loc[index]['task_def']+  ' Only respond with the predicted last sentence.'
     elif df.loc[index]['dataset_id']==6:
-                chat=model.start_chat(history=[
-            {
-                'role': 'user',
-                'parts': [df.loc[index]['task_def']+ ' Only respond with the news article.']
-            },
-            {
-                'role': 'model',
-                'parts': ['Understood'],
-            },
-        ])
+        task_def=df.loc[index]['task_def']+ ' Only respond with the news article.'
     elif df.loc[index]['dataset_id']==7:
-                chat=model.start_chat(history=[
-            {
-                'role': 'user',
-                'parts': [df.loc[index]['task_def']+ ' Only respond with the paragraph.']
-            },
-            {
-                'role': 'model',
-                'parts': ['Understood'],
-            },
-        ])
+        task_def=df.loc[index]['task_def']+ '  Only respond with the paragraph.'
     elif df.loc[index]['dataset_id']==8:
-                chat=model.start_chat(history=[
-            {
-                'role': 'user',
-                'parts': [df.loc[index]['task_def']+ ' Only respond with the paraphrased sentence.']
-            },
-            {
-                'role': 'model',
-                'parts': ['Understood'],
-            },
-        ])
+        task_def=df.loc[index]['task_def']+ ' Only respond with the paraphrased sentence.'
+    elif df.loc[index]['dataset_id']==9:
+        task_def=df.loc[index]['task_def']+ ' Only respond with the letter indicating the most corresponding reason.'
     else:
-        chat=model.start_chat(history=[
-            {
-                'role': 'user',
-                'parts': [df.loc[index]['task_def']]
-            },
-            {
-                'role': 'model',
-                'parts': ['Understood'],
-            },
-        ]) 
+        task_def=df.loc[index]['task_def']
+
+    chat=model.start_chat(history=[
+        {
+            'role': 'user',
+            'parts': [task_def]
+        },
+        {
+            'role': 'model',
+            'parts': ['Understood'],
+        },
+    ]) 
     response=chat.send_message(df.loc[index]['final_prompt_en'])
     return response
 

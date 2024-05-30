@@ -38,77 +38,31 @@ parser.add_argument(
 def gather_answers(index,df,model='gpt-3.5-turbo'):
     temperature=temp_dict[df.loc[index]['dataset_id']]
     if df.loc[index]['dataset_id']==3:
-        response = client.messages.create(
-            model=model,
-            system="You are a helpful assistant.",
-            messages=[
-            {"role": "user", "content": df.loc[index]['task_def']+ ' Only respond by giving the rating.'},
-            {"role":"assistant","content":'Understood'},
-            {"role": "user", "content": df.loc[index]['final_prompt_en']}
-            ],
-            temperature=temperature,
-            max_tokens=4096
-        )
+        task_def=df.loc[index]['task_def']+ ' Only respond with the rating.'
     elif df.loc[index]['dataset_id']==1:
-        response = client.messages.create(
-            model=model,
-            system="You are a helpful assistant.",
-            messages=[
-            {"role": "user", "content": df.loc[index]['task_def']+ ' Only respond with the predicted last sentence.'},
-            {"role":"assistant","content":'Understood'},
-            {"role": "user", "content": df.loc[index]['final_prompt_en']}
-            ],
-            temperature=temperature,
-            max_tokens=4096
-        )
+        task_def=df.loc[index]['task_def']+  ' Only respond with the predicted last sentence.'
     elif df.loc[index]['dataset_id']==6:
-        response = client.messages.create(
-            model=model,
-            system="You are a helpful assistant.",
-            messages=[
-            {"role": "user", "content": df.loc[index]['task_def']+ ' Only respond with the news article.'},
-            {"role":"assistant","content":'Understood'},
-            {"role": "user", "content": df.loc[index]['final_prompt_en']}
-            ],
-            temperature=temperature,
-            max_tokens=4096
-        )
+        task_def=df.loc[index]['task_def']+ ' Only respond with the news article.'
     elif df.loc[index]['dataset_id']==7:
-        response = client.messages.create(
-            model=model,
-            system="You are a helpful assistant.",
-            messages=[
-            {"role": "user", "content": df.loc[index]['task_def']+ ' Only respond with the paragraph.'},
-            {"role":"assistant","content":'Understood'},
-            {"role": "user", "content": df.loc[index]['final_prompt_en']}
-            ],
-            temperature=temperature,
-            max_tokens=4096
-        )
+        task_def=df.loc[index]['task_def']+ '  Only respond with the paragraph.'
     elif df.loc[index]['dataset_id']==8:
-        response = client.messages.create(
-            model=model,
-            system="You are a helpful assistant.",
-            messages=[
-            {"role": "user", "content": df.loc[index]['task_def']+ ' Only respond with the paraphrased sentence.'},
-            {"role":"assistant","content":'Understood'},
-            {"role": "user", "content": df.loc[index]['final_prompt_en']}
-            ],
-            temperature=temperature,
-            max_tokens=4096
-        )
+        task_def=df.loc[index]['task_def']+ ' Only respond with the paraphrased sentence.'
+    elif df.loc[index]['dataset_id']==9:
+        task_def=df.loc[index]['task_def']+ ' Only respond with the letter indicating the most corresponding reason.'
     else:
-        response = client.messages.create(
-            model=model,
-            system="You are a helpful assistant.",
-            messages=[
-            {"role": "user", "content": df.loc[index]['task_def']},
-            {"role":"assistant","content":'Understood'},
-            {"role": "user", "content": df.loc[index]['final_prompt_en']}
-            ],
-            temperature=temperature,
-            max_tokens=4096
-        )
+        task_def=df.loc[index]['task_def']
+
+    response = client.messages.create(
+        model=model,
+        system="You are a helpful assistant.",
+        messages=[
+        {"role": "user", "content": task_def},
+        {"role":"assistant","content":'Understood'},
+        {"role": "user", "content": df.loc[index]['final_prompt_en']}
+        ],
+        temperature=temperature,
+        max_tokens=4096
+    )
     return response
 
 if __name__ == "__main__":
