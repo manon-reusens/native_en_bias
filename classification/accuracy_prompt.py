@@ -62,7 +62,7 @@ class Accuracy_Runner:
                         extracted_number=int(i)+extracted_number
                 else:
                     extracted_number=0
-                gold_label=int(row['req_output'])  
+                gold_label=int(re.search(r'\d',row['req_output'])) 
                 self.df.at[index,'accuracy_score_'+self.column]=int(extracted_number==gold_label)  
         return self.df
     def check_tweetqa_mctaco(self):
