@@ -23,7 +23,7 @@ class Accuracy_Runner:
 
     def _calculate(self):
         self.check_amazon_food()
-        self.check_timetravel_sent()
+        # self.check_timetravel_sent()
         self.check_abductivenli_sent()
         self.check_tweetqa_mctaco()
         self.check_commonsense()
@@ -43,25 +43,27 @@ class Accuracy_Runner:
                 self.df.at[index,'accuracy_score_'+self.column]=int(extracted_number==gold_label)
         return self.df
 
-    def check_timetravel_sent(self):
-        for index, row in self.df.iterrows():
-            if row['dataset_id']==2:
-                gold_label=row['req_output']
-                if not (('option 1' in row[self.column].lower()) and ('option 2' in row[self.column].lower())):
-                    self.df.at[index,'accuracy_score_'+self.column]=int(gold_label.lower() in row[self.column].lower())
-                else:self.df.at[index,'accuracy_score_'+self.column]=0
-        return self.df
+    # def check_timetravel_sent(self):
+    #     for index, row in self.df.iterrows():
+    #         if row['dataset_id']==2:
+    #             gold_label=row['req_output']
+    #             if not (('option 1' in row[self.column].lower()) and ('option 2' in row[self.column].lower())):
+    #                 self.df.at[index,'accuracy_score_'+self.column]=int(gold_label.lower() in row[self.column].lower())
+    #             else:self.df.at[index,'accuracy_score_'+self.column]=0
+    #     return self.df
 
     def check_abductivenli_sent(self):
         for index, row in self.df.iterrows():
-            if row['dataset_id']==0:
+            if (row['dataset_id']==0)or (row['dataset_id']==2):
                 gold_label=row['req_output']
-                if gold_label==row[self.column]:
-                    self.df.at[index,'accuracy_score_'+self.column]=1
-                elif str('middle '+gold_label) in row[self.column].lower() and not ((str('middle 1') in row[self.column].lower()) and (str('middle 2') in row[self.column].lower())):
-                    self.df.at[index,'accuracy_score_'+self.column]=1
+                extracted_number=0
+                if re.findall(r'(\d+)',row[self.column])!=None:
+                    for i in re.findall(r'(\d+)',row[self.column]):
+                        extracted_number=int(i)+extracted_number
                 else:
-                    self.df.at[index,'accuracy_score_'+self.column]=0
+                    extracted_number=0
+                gold_label=int(row['req_output'])  
+                self.df.at[index,'accuracy_score_'+self.column]=int(extracted_number==gold_label)  
         return self.df
     def check_tweetqa_mctaco(self):
         for index, row in self.df.iterrows():
