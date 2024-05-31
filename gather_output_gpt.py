@@ -19,7 +19,7 @@ parser.add_argument(
                     action="store",
                     type=str,
                     default='gpt3.5',
-                    choices=['gpt3.5', 'gpt4'],
+                    choices=['gpt3.5', 'gpt4','gpt4_o'],
                     help="add the score you want to calculate"
 )
 
@@ -176,6 +176,8 @@ if __name__ == "__main__":
         model='gpt-3.5-turbo-0125'
     if args.model=='gpt4':
         model='gpt-4-0125-preview'
+    if args.model=='gpt4_o':
+        model='gpt-4o-2024-05-13'
     
     results_full=[]
     cleaned_reasults_gpt3=[]
