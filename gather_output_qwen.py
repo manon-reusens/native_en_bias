@@ -152,7 +152,7 @@ if __name__ == "__main__":
             guess, result=gather_answers(i,df_final, model=model)
             df_final.at[i,col_guess]=str(result)
         result=gather_answers(i,df_final, model=model)
-        df_final.at[i,args.model+' replies']=str(result)
+        df_final.at[i,col_replies]=str(result)
         # df_final.at[i,args.model+' logprobs']=str(result.choices[0].logprobs.content)
         results_full.append(result)
         cleaned_reasults.append(result)
