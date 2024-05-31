@@ -19,7 +19,7 @@ parser.add_argument(
                     action="store",
                     type=str,
                     default='Qwen1.5-0.5B-Chat',
-                    choices=['Qwen1.5-7B-Chat','Qwen1.5-0.5B-Chat','Qwen1.5-32B-Chat','Qwen1.5-110B-Chat'],
+                    choices=['Qwen1.5-7B-Chat','Qwen1.5-0.5B-Chat','Qwen1.5-32B-Chat','Qwen1.5-110B-Chat','meta-llama/Llama-2-7b-chat-hf'],
                     help="add the score you want to calculate"
 )
 
@@ -139,9 +139,12 @@ if __name__ == "__main__":
     if args.mode=='guess_native':
         df_final[col_guess]=None
         df_final[col_guess_logprobs]=None
-
-    model = AutoModelForCausalLM.from_pretrained("Qwen/"+args.model, device_map="auto")
-    tokenizer = AutoTokenizer.from_pretrained("Qwen/"+args.model)
+    if 'Qwen' in args.model:
+        model = AutoModelForCausalLM.from_pretrained("Qwen/"+args.model, device_map="auto")
+        tokenizer = AutoTokenizer.from_pretrained("Qwen/"+args.model)
+    elif 'Llama' in args.model:
+        model = AutoModelForCausalLM.from_pretrained(args.model, device_map="auto")
+        tokenizer = AutoTokenizer.from_pretrained(+args.model)
     
     results_full=[]
     cleaned_reasults=[]
