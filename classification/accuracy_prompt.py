@@ -84,7 +84,18 @@ class Accuracy_Runner:
                     num_in_text+=1
                 if num_in_text==1:
                     self.df.at[index,'accuracy_score_'+self.column]=int(gold_label in row[self.column])
-                else: print(row[self.column])
+                else: 
+                    num_in_text=0
+                    if ('A.' in row[self.column]) or ('A:' in row[self.column]):
+                        num_in_text+=1
+                    if 'B.' in row[self.column]or ('B:' in row[self.column]):
+                        num_in_text+=1
+                    if 'C.' in row[self.column] or ('C:' in row[self.column]):
+                        num_in_text+=1
+                    if num_in_text==1:
+                        self.df.at[index,'accuracy_score_'+self.column]=int(gold_label in row[self.column])
+
+                    else: print('the problem is the following: '+ row[self.column])
         return self.df
     
 
