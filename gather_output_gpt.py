@@ -164,11 +164,11 @@ if __name__ == "__main__":
         col_replies=args.model+' replies_reformulate'
         col_logprobs=args.mode+' logprobs_reformulate'
 
-    #df_final_set[col_replies]=None
-    #df_final_set[col_logprobs]=None
-    #if args.mode=='guess_native':
-        #df_final_set[col_guess]=None
-        #df_final_set[col_guess_logprobs]=None
+    df_final_set[col_replies]=None
+    df_final_set[col_logprobs]=None
+    if args.mode=='guess_native':
+        df_final_set[col_guess]=None
+        df_final_set[col_guess_logprobs]=None
 
     temp_dict={0:0,1:0.7,2:0,3:0,4:0,5:0,6:0.7,7:0.7,8:0.7,9:0}
 
