@@ -34,8 +34,11 @@ class Accuracy_Runner:
         for index, row in self.df.iterrows():
             if row['dataset_id']==3:
                 extracted_number=0
-                for i in re.findall(r'(\d+)',row[self.column]):
-                    extracted_number=int(i)+extracted_number
+                if re.findall(r'(\d+)',row[self.column])!=None:
+                    for i in re.findall(r'(\d+)',row[self.column]):
+                        extracted_number=int(i)+extracted_number
+                else:
+                    extracted_number=0
                 gold_label=int(row['req_output'])
                 self.df.at[index,'accuracy_score_'+self.column]=int(extracted_number==gold_label)
         return self.df
