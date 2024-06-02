@@ -134,31 +134,34 @@ if __name__ == "__main__":
         col_replies=args.model+' replies_reformulate'
         col_logprobs=args.mode+' logprobs_reformulate'
     
-    df_final[col_replies]=None
-    df_final[col_logprobs]=None
+    if col_replies not in df_final.columns:
+        df_final[col_replies]=None
+        df_final[col_logprobs]=None
     if args.mode=='guess_native':
-        df_final[col_guess]=None
-        df_final[col_guess_logprobs]=None
+        if col_replies not in df_final.columns:
+            df_final[col_guess]=None
+            df_final[col_guess_logprobs]=None
     if 'Qwen' in args.model:
         model = AutoModelForCausalLM.from_pretrained("Qwen/"+args.model, device_map="auto")
         tokenizer = AutoTokenizer.from_pretrained("Qwen/"+args.model)
     elif 'Llama' in args.model:
         model = AutoModelForCausalLM.from_pretrained(args.model, device_map="auto")
-        tokenizer = AutoTokenizer.from_pretrained(+args.model)
+        tokenizer = AutoTokenizer.from_pretrained(args.model)
     
     results_full=[]
     cleaned_reasults=[]
     for i in df_final.index:
         if i%200==0:
             df_final.to_parquet(args.output_file)
-        if args.mode=='guess_native':
-            guess, result=gather_answers(i,df_final, model=model)
-            df_final.at[i,col_guess]=str(result)
-        result=gather_answers(i,df_final, model=model)
-        df_final.at[i,col_replies]=str(result)
+        if df_final.loc[i][col_replies]==None:
+            if args.mode=='guess_native':
+                guess, result=gather_answers(i,df_final, model=model)
+                df_final.at[i,col_guess]=str(result)
+            result=gather_answers(i,df_final, model=model)
+            df_final.at[i,col_replies]=str(result)
         # df_final.at[i,args.model+' logprobs']=str(result.choices[0].logprobs.content)
-        results_full.append(result)
-        cleaned_reasults.append(result)
+            results_full.append(result)
+            cleaned_reasults.append(result)
 
     df_final.to_parquet(args.output_file)
 
