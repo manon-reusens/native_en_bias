@@ -46,6 +46,15 @@ parser.add_argument(
                     choices=['standard','add_all_native','add_all_non_native','guess_native','reformulate'],
                     help="Give the full path of where you want to save the output file",
 )
+parser.add_argument(
+                    "--get_gold_label",
+                    action="store",
+                    type=str,
+                    default='False',
+                    choices=["True","False","add_prompt_then_true"],
+                    help="True if you get the gold label for the annotations using full prompt, if not gold label Then False, otherwise add_prompt_then_true",
+
+)
 
 import openai
 import pandas as pd
@@ -133,9 +142,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
     df=pd.read_parquet(args.input_file)
     df_final=df.loc[df['validated']==1]
-
-    df_final['final_prompt_en']=df_final.apply(lambda row: row['instruction'].replace('<markprompt>[Your Prompt]</markprompt>.', row['prompt_en']).replace('<markprompt>[Your Prompt]</markprompt>?', row['prompt_en']), axis=1)
-    df_final['final_prompt_en']=df_final.apply(lambda row: row['final_prompt_en'].replace('<markprompt>[Your Prompt]</markprompt>', row['prompt_en']), axis=1)
+    if args.get_gold_label=='False':
+        df_final['final_prompt_en']=df_final.apply(lambda row: row['instruction'].replace('<markprompt>[Your Prompt]</markprompt>.', row['prompt_en']).replace('<markprompt>[Your Prompt]</markprompt>?', row['prompt_en']), axis=1)
+        df_final['final_prompt_en']=df_final.apply(lambda row: row['final_prompt_en'].replace('<markprompt>[Your Prompt]</markprompt>', row['prompt_en']), axis=1)
+    elif args.get_gold_label=='True':
+        df_final['final_prompt_en']=df_final['instruction']
+    # elif args.get_gold_label=='add_prompt_then_true':
+        
 
     if args.set=='10 & 30':
         df_final_set=df_final.loc[(df_final['set_id']==10) | (df_final['set_id']==30)]
