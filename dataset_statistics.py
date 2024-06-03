@@ -76,7 +76,7 @@ def get_cls_embeddings(tokenizer, model,text,batch_size=32):
     embeddings=[]
     for i in range(0,len(text),batch_size):
         batch=text[i:i+batch_size]
-        encoded_input=tokenizer(batch,return_tensors='pt',padding=True,truncation=True) #check what to do... miss wel
+        encoded_input=tokenizer(batch,return_tensors='pt',padding=True,truncation=True)
         with torch.no_grad():
             output=model(**encoded_input)
 
@@ -144,7 +144,7 @@ if __name__ == "__main__":
                 scaler = StandardScaler()
                 embeddings_scaled = scaler.fit_transform(embeddings_array)
 
-                reducer = UMAP(n_neighbors=15, n_components=2, metric='euclidean', random_state=42)
+                reducer = UMAP(n_neighbors=15, n_components=2, metric='cosine', random_state=42)
                 embedding_2d = reducer.fit_transform(embeddings_scaled)
 
                 df_subset['UMAP-1'] = embedding_2d[:, 0]
