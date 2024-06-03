@@ -143,6 +143,9 @@ if __name__ == "__main__":
     df=pd.read_parquet(args.input_file)
     if args.get_gold_label=='False':
         df_final=df.loc[df['validated']==1]
+    else:
+        df_final=df
+
     if args.get_gold_label=='False':
         df_final['final_prompt_en']=df_final.apply(lambda row: row['instruction'].replace('<markprompt>[Your Prompt]</markprompt>.', row['prompt_en']).replace('<markprompt>[Your Prompt]</markprompt>?', row['prompt_en']), axis=1)
         df_final['final_prompt_en']=df_final.apply(lambda row: row['final_prompt_en'].replace('<markprompt>[Your Prompt]</markprompt>', row['prompt_en']), axis=1)
