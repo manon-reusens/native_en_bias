@@ -119,7 +119,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     device = "cuda"
     df=pd.read_parquet(args.input_file)
-    df_final=df.loc[df['validated']==1]
+    if args.get_gold_label=='False':
+        df_final=df.loc[df['validated']==1]
 
     if args.get_gold_label=='False':
         df_final['final_prompt_en']=df_final.apply(lambda row: row['instruction'].replace('<markprompt>[Your Prompt]</markprompt>.', row['prompt_en']).replace('<markprompt>[Your Prompt]</markprompt>?', row['prompt_en']), axis=1)
@@ -127,7 +128,7 @@ if __name__ == "__main__":
     elif args.get_gold_label=='True':
         df_final['final_prompt_en']=df_final['instruction']
 
-        
+
     temp_dict={0:0,1:0.7,2:0,3:0,4:0,5:0,6:0.7,7:0.7,8:0.7,9:0}
     if args.mode=='add_all_native':
         col_replies=args.model+' replies_all_native'

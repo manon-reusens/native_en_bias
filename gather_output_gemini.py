@@ -128,14 +128,15 @@ def gather_answers(index,df,model='gemini-1.5-flash'):
 if __name__ == "__main__":
     args = parser.parse_args()
     df=pd.read_parquet(args.input_file)
-    df_final=df.loc[df['validated']==1]
+    if args.get_gold_label=='False':
+        df_final=df.loc[df['validated']==1]
 
     if args.get_gold_label=='False':
         df_final['final_prompt_en']=df_final.apply(lambda row: row['instruction'].replace('<markprompt>[Your Prompt]</markprompt>.', row['prompt_en']).replace('<markprompt>[Your Prompt]</markprompt>?', row['prompt_en']), axis=1)
         df_final['final_prompt_en']=df_final.apply(lambda row: row['final_prompt_en'].replace('<markprompt>[Your Prompt]</markprompt>', row['prompt_en']), axis=1)
     elif args.get_gold_label=='True':
         df_final['final_prompt_en']=df_final['instruction']
-        
+
     genai.configure(api_key=args.key)
     if args.mode=='add_all_native':
         col_replies=args.model+' replies_all_native'
