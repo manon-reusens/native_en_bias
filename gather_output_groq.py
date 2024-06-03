@@ -149,11 +149,13 @@ if __name__ == "__main__":
         col_replies=args.model+' replies_reformulate'
         col_logprobs=args.mode+' logprobs_reformulate'
 
-    df_final_set[col_replies]=None
-    df_final_set[col_logprobs]=None
+    if col_replies not in df_final_set.columns:
+        df_final_set[col_replies]=None
+        df_final_set[col_logprobs]=None
     if args.mode=='guess_native':
-        df_final_set[col_guess]=None
-        df_final_set[col_guess_logprobs]=None
+        if col_replies not in df_final_set.columns:
+            df_final_set[col_guess]=None
+            df_final_set[col_guess_logprobs]=None
  
     temp_dict={0:0,1:0.7,2:0,3:0,4:0,5:0,6:0.7,7:0.7,8:0.7,9:0}
     
@@ -162,20 +164,21 @@ if __name__ == "__main__":
     for i in df_final_set.index:
         if i%200==0:
             df_final_set.to_parquet(args.output_file)
-        try:
-            if args.mode=='guess_native':
-                result_guess, result=gather_answers(i,df_final_set, model=args.model)
-                df_final_set.at[i,col_guess]=result_guess.choices[0].message.content
-            else:
-                result=gather_answers(i,df_final_set, model=args.model)
-            df_final_set.at[i,col_replies]=result.choices[0].message.content
-            # df_final_set.at[i,col_logprobs]=str(result.choices[0].logprobs.content)
-            results_full.append(result)
-            cleaned_results.append(result.choices[0].message.content)
-            time.sleep(2)
-        except:
-            print('we are going to sleep for a while')
-            time.sleep(5)
+        if df_final_set.loc[i][col_replies]==None:
+            try:
+                if args.mode=='guess_native':
+                    result_guess, result=gather_answers(i,df_final_set, model=args.model)
+                    df_final_set.at[i,col_guess]=result_guess.choices[0].message.content
+                else:
+                    result=gather_answers(i,df_final_set, model=args.model)
+                df_final_set.at[i,col_replies]=result.choices[0].message.content
+                # df_final_set.at[i,col_logprobs]=str(result.choices[0].logprobs.content)
+                results_full.append(result)
+                cleaned_results.append(result.choices[0].message.content)
+                time.sleep(2)
+            except:
+                print('we are going to sleep for a while')
+                time.sleep(5)
 
     df_final_set.to_parquet(args.output_file)
 
