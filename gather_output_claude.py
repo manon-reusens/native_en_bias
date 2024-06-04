@@ -118,8 +118,10 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             ],
             temperature=0,
             max_tokens=4096)
+        print(prompt.content[0].text)
         text_prompt=prompt.content[0].text
         full_prompt=df.loc[index]['final_prompt_en'].replace('<markprompt>[Your Prompt]</markprompt>.', text_prompt).replace('<markprompt>[Your Prompt]</markprompt>?', text_prompt).replace('<markprompt>[Your Prompt]</markprompt>',text_prompt)
+        print(full_prompt)
         response=client.messages.create(
             model=model,
             system=system_prompt2,
@@ -131,6 +133,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             temperature=temperature,
             max_tokens=4096
         )
+        print(response)
         return prompt,response
     else:
         response = client.messages.create(
@@ -209,23 +212,25 @@ if __name__ == "__main__":
         if i%200==0:
             df_final.to_parquet(args.output_file)
         if df_final.loc[i][col_replies]==None:
-            try:
-                if args.mode=='guess_native':
-                    result_guess,result=gather_answers(i,df_final, model=model)
-                    df_final.at[i,col_guess]=result_guess.content[0].text
+            #try:
+            if args.mode=='guess_native':
+                result_guess,result=gather_answers(i,df_final, model=model)
+                df_final.at[i,col_guess]=result_guess.content[0].text
                     # df_final.at[i,col_guess_logprobs]=str(result_guess.choices[0].logprobs.content)
-                elif args.get_gold_label=='add_prompt_then_true':
-                    result_prompt,result=gather_answers(i,df_final, model=model)
-                    df_final.at[i,col_annotation]=result_prompt.content[0].text
-                else:
-                    result=gather_answers(i,df_final, model=model)
-                df_final.at[i,col_replies]=result.content[0].text
+            elif args.get_gold_label=='add_prompt_then_true':
+                result_prompt,result=gather_answers(i,df_final, model=model)
+                print(result_prompt.content[0].text)
+                df_final.at[i,args.model+' prompt']=str(result_prompt.content[0].text)
+            else:
+                result=gather_answers(i,df_final, model=model)
+            #print(result)
+            df_final.at[i,col_replies]=result.content[0].text
             # df_final.at[i,args.model+' logprobs']=str(result.choices[0].logprobs.content)
-                results_full.append(result)
-                cleaned_reasults.append(result.content[0].text)
-            except:
-                print('we are going to sleep for a while')
-                time.sleep(5)
+            results_full.append(result)
+            cleaned_reasults.append(result.content[0].text)
+            #except:
+                #print('we are going to sleep for a while')
+                #time.sleep(5)
 
     df_final.to_parquet(args.output_file)
 
