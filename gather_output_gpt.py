@@ -95,6 +95,10 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
     else:
         system_prompt="You are a helpful assistant."
 
+    if args.get_gold_label=='add_prompt_then_true':
+        system_prompt1="You are a helpful assistant. You will get three main parts: a task definition, desired output, and a prompt_to_annotate. Your task is to come up with prompts that should be filled in at the placeholder <markprompt>[Your Prompt]</markprompt> in the prompt_to_annotate, such that the desired output would be outputted by a model when given the task deifnition and full prompt. Only respond with the replacement of the placeholder."
+        system_prompt2="You are a helpful assistant."
+
     if args.mode=='guess_native':
         response1=client.chat.completions.create(
             model=model,
@@ -122,6 +126,34 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             seed=42
         )
         return response1,response2
+    elif args.get_gold_label=='add_prompt_then_true':
+        prompt=client.chat.completions.create(
+            model=model,
+            messages=[
+            {"role": "system", "content": system_prompt1},
+            {"role": "user", "content": 'task definition: '+task_def+'instruction: '+df.loc[index]['final_prompt_en']+' the desired output: '+df.loc[index]['req_output']}
+            ],
+            temperature=0,
+            logprobs=False,
+            top_logprobs=5,
+            seed=42
+        )
+        text_prompt=prompt.choices[0].message.content
+        full_prompt=df.loc[index]['final_prompt_en'].replace('<markprompt>[Your Prompt]</markprompt>.', text_prompt).replace('<markprompt>[Your Prompt]</markprompt>?', text_prompt).replace('<markprompt>[Your Prompt]</markprompt>',text_prompt)
+        prompt=client.chat.completions.create(
+            model=model,
+            messages=[
+            {"role": "system", "content": system_prompt2},
+            {"role": "user", "content": task_def},
+            {"role":'assistant',"content":'Understood'},
+            {"role": "user", "content": full_prompt}
+            ],
+            temperature=temperature,
+            logprobs=False,
+            top_logprobs=5,
+            seed=42
+        )
+        return prompt,response
     else:
         response = client.chat.completions.create(
             model=model,
@@ -151,7 +183,8 @@ if __name__ == "__main__":
         df_final['final_prompt_en']=df_final.apply(lambda row: row['final_prompt_en'].replace('<markprompt>[Your Prompt]</markprompt>', row['prompt_en']), axis=1)
     elif args.get_gold_label=='True':
         df_final['final_prompt_en']=df_final['instruction']
-    # elif args.get_gold_label=='add_prompt_then_true':
+    elif args.get_gold_label=='add_prompt_then_true':
+        df_final['final_prompt_en']=df_final['prompt_instruction']
         
 
     if args.set=='10 & 30':
@@ -188,6 +221,10 @@ if __name__ == "__main__":
         if col_guess not in df_final_set.columns:
             df_final_set[col_guess]=None
             df_final_set[col_guess_logprobs]=None
+    if args.get_gold_label=='add_prompt_then_true':
+        col_annotation=args.model+' prompt'
+        if col_annotation not in df_final_set.columns:
+            df_final_set[col_annotation]=None
 
     temp_dict={0:0,1:0.7,2:0,3:0,4:0,5:0,6:0.7,7:0.7,8:0.7,9:0}
 
@@ -209,6 +246,9 @@ if __name__ == "__main__":
                     result_guess,result=gather_answers(i,df_final_set, model=model)
                     df_final_set.at[i,col_guess]=result_guess.choices[0].message.content
                     df_final_set.at[i,col_guess_logprobs]=str(result_guess.choices[0].logprobs.content)
+                elif args.get_gold_label=='add_prompt_then_true':
+                    result_prompt,result=gather_answers(i,df_final_set, model=model)
+                    df_final_set.at[i,col_annotation]=result_prompt.choices[0].message.content
                 else:
                     result=gather_answers(i,df_final_set, model=model)
                 df_final_set.at[i,col_replies]=result.choices[0].message.content
