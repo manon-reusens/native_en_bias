@@ -110,7 +110,6 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             )
         return response1,response2
     elif args.get_gold_label=='add_prompt_then_true':
-        print('trying to get the answer')
         prompt=client.messages.create(
             model=model,
             system=system_prompt1,
@@ -118,11 +117,10 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             {"role": "user", "content": 'task definition: '+task_def+'instruction: '+df.loc[index]['final_prompt_en']+' the desired output: '+df.loc[index]['req_output']}
             ],
             temperature=0,
-            max_tokens=4096
-        print(prompt.content[0].text)
+            max_tokens=4096)
         text_prompt=prompt.content[0].text
         full_prompt=df.loc[index]['final_prompt_en'].replace('<markprompt>[Your Prompt]</markprompt>.', text_prompt).replace('<markprompt>[Your Prompt]</markprompt>?', text_prompt).replace('<markprompt>[Your Prompt]</markprompt>',text_prompt)
-        prompt=client.messages.create(
+        response=client.messages.create(
             model=model,
             system=system_prompt2,
             messages=[
@@ -216,7 +214,6 @@ if __name__ == "__main__":
                 df_final.at[i,col_guess]=result_guess.content[0].text
                     # df_final.at[i,col_guess_logprobs]=str(result_guess.choices[0].logprobs.content)
             elif args.get_gold_label=='add_prompt_then_true':
-                print('we will get the results now')
                 result_prompt,result=gather_answers(i,df_final, model=model)
                 df_final.at[i,col_annotation]=result_prompt.content[0].text
             else:

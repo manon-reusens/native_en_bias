@@ -207,8 +207,8 @@ if __name__ == "__main__":
                 guess, result=gather_answers(i,df_final, model=model)
                 df_final.at[i,col_guess]=str(guess)
             elif args.get_gold_label=='add_prompt_then_true':
-                    result_prompt,result=gather_answers(i,df_final, model=model)
-                    df_final.at[i,col_annotation]=str(result_prompt)
+                result_prompt,result=gather_answers(i,df_final, model=model)
+                df_final.at[i,col_annotation]=str(result_prompt)
             result=gather_answers(i,df_final, model=model)
             df_final.at[i,col_replies]=str(result)
         # df_final.at[i,args.model+' logprobs']=str(result.choices[0].logprobs.content)

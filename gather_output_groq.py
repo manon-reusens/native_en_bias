@@ -126,7 +126,7 @@ def gather_answers(index,df,model='mixtral-8x7b-32768'):
         )
         text_prompt=prompt.choices[0].message.content
         full_prompt=df.loc[index]['final_prompt_en'].replace('<markprompt>[Your Prompt]</markprompt>.', text_prompt).replace('<markprompt>[Your Prompt]</markprompt>?', text_prompt).replace('<markprompt>[Your Prompt]</markprompt>',text_prompt)
-        prompt=client.chat.completions.create(
+        response=client.chat.completions.create(
             model=model,
             messages=[
             {"role": "system", "content": system_prompt2},

@@ -142,7 +142,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
         text_prompt=prompt.choices[0].message.content
         print(text_prompt)
         full_prompt=df.loc[index]['final_prompt_en'].replace('<markprompt>[Your Prompt]</markprompt>.', text_prompt).replace('<markprompt>[Your Prompt]</markprompt>?', text_prompt).replace('<markprompt>[Your Prompt]</markprompt>',text_prompt)
-        prompt=client.chat.completions.create(
+        response=client.chat.completions.create(
             model=model,
             messages=[
             {"role": "system", "content": system_prompt2},
