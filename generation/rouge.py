@@ -2,8 +2,8 @@ import pandas as pd
 import evaluate
 
 class RougeRunner:
-    def __init__(self,df,column):
-        """initializes the BertscoreRunner.
+    def __init__(self,df,column,ground_truth):
+        """initializes the RougeRunner.
         
         Args:
                 df: the dataset for which the bleu scores have to be calculated
@@ -11,11 +11,16 @@ class RougeRunner:
         """
         self.df = df
         self.column=column
+        self.ground_truth=ground_truth
     def __call__(self):
         rouge = evaluate.load('rouge')
         
         predictions=self.df.loc[(self.df['dataset_id']==1) | (self.df['dataset_id']==6)|(self.df['dataset_id']==7) | (self.df['dataset_id']==8)][self.column]
-        references=self.df.loc[(self.df['dataset_id']==1) | (self.df['dataset_id']==6)|(self.df['dataset_id']==7) | (self.df['dataset_id']==8)]['req_output']
+        if self.ground_truth!=None:
+            print('we are comparing with the newly generated column')
+            references=self.df.loc[(self.df['dataset_id']==1) | (self.df['dataset_id']==6)|(self.df['dataset_id']==7) | (self.df['dataset_id']==8)]['generated_req_output']
+        else:
+            references=self.df.loc[(self.df['dataset_id']==1) | (self.df['dataset_id']==6)|(self.df['dataset_id']==7) | (self.df['dataset_id']==8)]['req_output']
         results = rouge.compute(predictions=list(predictions), references=list(references), use_aggregator=False)
 
         indices=self.df.loc[(self.df['dataset_id']==1) | (self.df['dataset_id']==6)|(self.df['dataset_id']==7) | (self.df['dataset_id']==8)].index
