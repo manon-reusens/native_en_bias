@@ -219,7 +219,7 @@ if __name__ == "__main__":
                     result_guess, result=gather_answers(i,df_final_set, model=args.model)
                     df_final_set.at[i,col_guess]=result_guess.choices[0].message.content
                 elif args.get_gold_label=='add_prompt_then_true':
-                    result_prompt,result=gather_answers(i,df_final_set, model=args.model,mode=args.get_gold_label)
+                    result_prompt,result=gather_answers(i,df_final_set, model=args.model)
                     df_final_set.at[i,col_annotation]=result_prompt.choices[0].message.content
                 else:
                     result=gather_answers(i,df_final_set, model=args.model)
