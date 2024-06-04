@@ -183,16 +183,16 @@ if __name__ == "__main__":
     elif args.mode=='reformulate':
         col_replies=args.model+' replies_reformulate'
         col_logprobs=args.mode+' logprobs_reformulate'
-    print('we also have defined the columns now')
-    df_final[col_replies]=None
-    df_final[col_logprobs]=None
-    if args.mode=='guess_native':
-        df_final[col_guess]=None
-        df_final[col_guess_logprobs]=None
-    if args.get_gold_label=='add_prompt_then_true':
-        col_annotation=args.model+' prompt'
-        if col_annotation not in df_final.columns:
-            df_final[col_annotation]=None
+    if col_replies not in df_final.columns:
+        df_final[col_replies]=None
+        df_final[col_logprobs]=None
+        if args.mode=='guess_native':
+            df_final[col_guess]=None
+            df_final[col_guess_logprobs]=None
+        if args.get_gold_label=='add_prompt_then_true':
+            col_annotation=args.model+' prompt'
+            if col_annotation not in df_final.columns:
+                df_final[col_annotation]=None
 
     temp_dict={0:0,1:0.7,2:0,3:0,4:0,5:0,6:0.7,7:0.7,8:0.7,9:0}
 
@@ -208,23 +208,24 @@ if __name__ == "__main__":
     for i in df_final.index:
         if i%200==0:
             df_final.to_parquet(args.output_file)
-        try:
-            if args.mode=='guess_native':
-                result_guess,result=gather_answers(i,df_final, model=model)
-                df_final.at[i,col_guess]=result_guess.content[0].text
+        if df_final.loc[i][col_replies]==None:
+            try:
+                if args.mode=='guess_native':
+                    result_guess,result=gather_answers(i,df_final, model=model)
+                    df_final.at[i,col_guess]=result_guess.content[0].text
                     # df_final.at[i,col_guess_logprobs]=str(result_guess.choices[0].logprobs.content)
-            elif args.get_gold_label=='add_prompt_then_true':
-                result_prompt,result=gather_answers(i,df_final, model=model)
-                df_final.at[i,col_annotation]=result_prompt.content[0].text
-            else:
-                result=gather_answers(i,df_final, model=model)
-            df_final.at[i,col_replies]=result.content[0].text
+                elif args.get_gold_label=='add_prompt_then_true':
+                    result_prompt,result=gather_answers(i,df_final, model=model)
+                    df_final.at[i,col_annotation]=result_prompt.content[0].text
+                else:
+                    result=gather_answers(i,df_final, model=model)
+                df_final.at[i,col_replies]=result.content[0].text
             # df_final.at[i,args.model+' logprobs']=str(result.choices[0].logprobs.content)
-            results_full.append(result)
-            cleaned_reasults.append(result.content[0].text)
-        except:
-            print('we are going to sleep for a while')
-            time.sleep(5)
+                results_full.append(result)
+                cleaned_reasults.append(result.content[0].text)
+            except:
+                print('we are going to sleep for a while')
+                time.sleep(5)
 
     df_final.to_parquet(args.output_file)
 
