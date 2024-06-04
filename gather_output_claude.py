@@ -53,6 +53,7 @@ parser.add_argument(
 
 
 def gather_answers(index,df,model='gpt-3.5-turbo'):
+    print('we get in the function')
     temperature=temp_dict[df.loc[index]['dataset_id']]
     if df.loc[index]['dataset_id']==3:
         task_def=df.loc[index]['task_def']+ ' Only respond with the rating.'
@@ -71,6 +72,8 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
     else:
         task_def=df.loc[index]['task_def']
 
+    print('we have defined the task def')
+
     if args.mode=='add_all_native':
         system_prompt="You are a helpful assistant. Respond as if you are interacting with a native English speaker"
     elif args.mode=='add_all_non_native':
@@ -81,7 +84,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
     if args.get_gold_label=='add_prompt_then_true':
         system_prompt1="You are a helpful assistant. You will get three main parts: a task definition, desired output, and a prompt_to_annotate. Your task is to come up with prompts that should be filled in at the placeholder <markprompt>[Your Prompt]</markprompt> in the prompt_to_annotate, such that the desired output would be outputted by a model when given the task deifnition and full prompt. Only respond with the replacement of the placeholder."
         system_prompt2="You are a helpful assistant."
-
+        print('this is ok')
     if args.mode=='guess_native':
         response1 = client.messages.create(
             model=model,
@@ -116,7 +119,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             ],
             temperature=0,
             max_tokens=4096
-        )
+        print(prompt.content[0].text)
         text_prompt=prompt.content[0].text
         full_prompt=df.loc[index]['final_prompt_en'].replace('<markprompt>[Your Prompt]</markprompt>.', text_prompt).replace('<markprompt>[Your Prompt]</markprompt>?', text_prompt).replace('<markprompt>[Your Prompt]</markprompt>',text_prompt)
         prompt=client.messages.create(
@@ -162,6 +165,7 @@ if __name__ == "__main__":
     elif args.get_gold_label=='add_prompt_then_true':
         df_final['final_prompt_en']=df_final['prompt_instruction']
 
+    print('this is still okay')
 
     client = anthropic.Client(api_key=args.key)
     if args.mode=='add_all_native':
@@ -181,7 +185,7 @@ if __name__ == "__main__":
     elif args.mode=='reformulate':
         col_replies=args.model+' replies_reformulate'
         col_logprobs=args.mode+' logprobs_reformulate'
-
+    print('we also have defined the columns now')
     df_final[col_replies]=None
     df_final[col_logprobs]=None
     if args.mode=='guess_native':
@@ -212,8 +216,9 @@ if __name__ == "__main__":
                 df_final.at[i,col_guess]=result_guess.content[0].text
                     # df_final.at[i,col_guess_logprobs]=str(result_guess.choices[0].logprobs.content)
             elif args.get_gold_label=='add_prompt_then_true':
-                    result_prompt,result=gather_answers(i,df_final, model=model,mode=args.get_gold_label)
-                    df_final.at[i,col_annotation]=result_prompt.content[0].text
+                print('we will get the results now')
+                result_prompt,result=gather_answers(i,df_final, model=model)
+                df_final.at[i,col_annotation]=result_prompt.content[0].text
             else:
                 result=gather_answers(i,df_final, model=model)
             df_final.at[i,col_replies]=result.content[0].text
