@@ -83,7 +83,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
                   {"role": "user", "content": 'Guess whether the writer of the following prompt is a native or non-native English speaker: '+df.loc[index]['prompt_en']}]
     elif args.get_gold_label=='add_prompt_then_true':
         messages=[{"role":"system","content":system_prompt1},
-                  {"role": "user", "content": 'task definition: '+task_def+'instruction: '+df.loc[index]['final_prompt_en']+' the desired output: '+df.loc[index]['req_output']}]
+                  {"role": "user", "content": 'task definition: '+task_def+'instruction: '+df.loc[index]['final_prompt_en'].replace('</markprompt>','').replace('<markprompt>','')+' the desired output: '+df.loc[index]['req_output']}]
     else:
         messages = [{"role":"system","content":system_prompt},
                     {"role": "user", "content": task_def}, {"role":"assistant","content":'Understood'},

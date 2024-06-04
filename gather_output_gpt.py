@@ -132,7 +132,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             model=model,
             messages=[
             {"role": "system", "content": system_prompt1},
-            {"role": "user", "content": 'task definition: '+task_def+'instruction: '+df.loc[index]['final_prompt_en']+' the desired output: '+df.loc[index]['req_output']}
+            {"role": "user", "content": 'task definition: '+task_def+'instruction: '+df.loc[index]['final_prompt_en'].replace('</markprompt>','').replace('<markprompt>','')+' the desired output: '+df.loc[index]['req_output']}
             ],
             temperature=0,
             logprobs=False,
