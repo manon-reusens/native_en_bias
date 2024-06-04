@@ -130,8 +130,10 @@ if __name__ == "__main__":
     for i in ['native_or_not','strict_native_or_not','western_native_or_not','african_or_not']:
         for value in df_amazon[i].unique():
             # max=df_amazon.loc[df_amazon[i]==value]['predicted_score_amazon'].max()
-            df_amazon.loc[df_amazon[i]==value][[i,'predicted_score_amazon']].hist(bins=range(0,6, 1))
-            plt.savefig(args.output_dir+'/hist_amazonfood_'+value+'.svg')
+            df_amazon.loc[(df_amazon[i]==value)& (df_amazon['accuracy_score_'+args.column]==0)][[i,'predicted_score_amazon']].hist(bins=range(0,7, 1))
+            plt.savefig(args.output_dir+'/hist_amazonfood_pred_'+value+'.svg')
+            df_amazon.loc[(df_amazon[i]==value)& (df_amazon['accuracy_score_'+args.column]==0)][[i,'req_output']].hist(bins=range(0,7, 1))
+            plt.savefig(args.output_dir+'/hist_amazonfood_req_output_'+value+'.svg')
 
     #create UMAP visualization from the embeddings
     col_to_store=args.column.replace(' replies','')
