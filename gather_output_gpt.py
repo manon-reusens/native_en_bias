@@ -135,8 +135,6 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             {"role": "user", "content": 'task definition: '+task_def+'instruction: '+df.loc[index]['final_prompt_en'].replace('</markprompt>','').replace('<markprompt>','')+' the desired output: '+df.loc[index]['req_output']}
             ],
             temperature=0,
-            logprobs=False,
-            top_logprobs=5,
             seed=42
         )
         text_prompt=prompt.choices[0].message.content
@@ -151,8 +149,6 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             {"role": "user", "content": full_prompt}
             ],
             temperature=temperature,
-            logprobs=False,
-            top_logprobs=5,
             seed=42
         )
         return prompt,response
