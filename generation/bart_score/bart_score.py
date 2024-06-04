@@ -12,6 +12,7 @@ class BartScoreRunner:
         self.column=column
         self.df['full_instruction']=self.df['task_def']+' '+self.df['final_prompt_en']
         self.predictions=self.df.loc[(self.df['dataset_id']==1) | (self.df['dataset_id']==6)|(self.df['dataset_id']==7) | (self.df['dataset_id']==8)][self.column]
+        self.ground_truth=ground_truth
         if self.ground_truth!=None:
             print('we are comparing with the newly generated column')
             self.references=self.df.loc[(self.df['dataset_id']==1) | (self.df['dataset_id']==6)|(self.df['dataset_id']==7) | (self.df['dataset_id']==8)]['generated_req_output']
