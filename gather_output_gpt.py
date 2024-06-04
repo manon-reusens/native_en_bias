@@ -127,6 +127,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
         )
         return response1,response2
     elif args.get_gold_label=='add_prompt_then_true':
+        print('we are in the correcr if statement')
         prompt=client.chat.completions.create(
             model=model,
             messages=[
@@ -139,6 +140,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             seed=42
         )
         text_prompt=prompt.choices[0].message.content
+        print(text_prompt)
         full_prompt=df.loc[index]['final_prompt_en'].replace('<markprompt>[Your Prompt]</markprompt>.', text_prompt).replace('<markprompt>[Your Prompt]</markprompt>?', text_prompt).replace('<markprompt>[Your Prompt]</markprompt>',text_prompt)
         prompt=client.chat.completions.create(
             model=model,
@@ -171,6 +173,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
         return response
 
 if __name__ == "__main__":
+    print('we start the experiment')
     args = parser.parse_args()
     df=pd.read_parquet(args.input_file)
     if args.get_gold_label=='False':
@@ -185,7 +188,7 @@ if __name__ == "__main__":
         df_final['final_prompt_en']=df_final['instruction']
     elif args.get_gold_label=='add_prompt_then_true':
         df_final['final_prompt_en']=df_final['prompt_instruction']
-        
+        print(df_final)
 
     if args.set=='10 & 30':
         df_final_set=df_final.loc[(df_final['set_id']==10) | (df_final['set_id']==30)]
@@ -195,7 +198,7 @@ if __name__ == "__main__":
     os.environ['OPENAI_API_KEY']=args.key
 
     client = OpenAI()
-
+    print('now we define the columns')
     if args.mode=='add_all_native':
         col_replies=args.model+' replies_all_native'
         col_logprobs=args.model+' logprobs_all_native'
@@ -222,6 +225,7 @@ if __name__ == "__main__":
             df_final_set[col_guess]=None
             df_final_set[col_guess_logprobs]=None
     if args.get_gold_label=='add_prompt_then_true':
+        print('we still need to define the annotation col')
         col_annotation=args.model+' prompt'
         if col_annotation not in df_final_set.columns:
             df_final_set[col_annotation]=None
@@ -247,9 +251,11 @@ if __name__ == "__main__":
                     df_final_set.at[i,col_guess]=result_guess.choices[0].message.content
                     df_final_set.at[i,col_guess_logprobs]=str(result_guess.choices[0].logprobs.content)
                 elif args.get_gold_label=='add_prompt_then_true':
+                    print('we will now gather the annotation')
                     result_prompt,result=gather_answers(i,df_final_set, model=model)
                     df_final_set.at[i,col_annotation]=result_prompt.choices[0].message.content
                 else:
+                    print('not in the correct loop to get the answer')
                     result=gather_answers(i,df_final_set, model=model)
                 df_final_set.at[i,col_replies]=result.choices[0].message.content
                 df_final_set.at[i,col_logprobs]=str(result.choices[0].logprobs.content)

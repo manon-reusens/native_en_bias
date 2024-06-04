@@ -107,6 +107,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             )
         return response1,response2
     elif args.get_gold_label=='add_prompt_then_true':
+        print('trying to get the answer')
         prompt=client.messages.create(
             model=model,
             system=system_prompt1,
