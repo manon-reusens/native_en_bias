@@ -44,12 +44,14 @@ parser.add_argument(
 parser.add_argument(
                     "--generated_ground_truth",
                     action="store",
+                    type=str,
                     default=None,
                     help="add new ground truth file for the generative tasks."
 )
 
 def merge_datasets(df1,df_groundtruth):
-    df_groundtruth=df_groundtruth.rename(columns={args.column:'generated_req_output'})
+    df_groundtruth=df_groundtruth.rename(columns={df_groundtruth.columns[8]:'generated_req_output'})
+    print(df_groundtruth.columns)
     df_nec=df_groundtruth[['nat_instr_id','generated_req_output']]
     df_merged=pd.merge(df1,df_nec,on='nat_instr_id')
     return df_merged
@@ -59,7 +61,9 @@ if __name__ == "__main__":
     df=pd.read_parquet(args.input_file)
     if args.generated_ground_truth != None:
         df_new=pd.read_parquet(args.generated_ground_truth)
+        print('we are merging now')
         df=merge_datasets(df,df_new)
+    print(args.generated_ground_truth)
 
     if args.score=='all' or args.score=='accuracy':
         acc_run=Accuracy_Runner(df,args.column) 

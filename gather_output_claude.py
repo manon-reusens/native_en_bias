@@ -119,6 +119,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
 if __name__ == "__main__":
     args = parser.parse_args()
     df=pd.read_parquet(args.input_file)
+    print(args.get_gold_label)
     if args.get_gold_label=='False':
         df_final=df.loc[df['validated']==1]
     else:
