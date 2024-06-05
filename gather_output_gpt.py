@@ -28,7 +28,7 @@ parser.add_argument(
                     action="store",
                     type=str,
                     default='all',
-                    choices=['all', '10 & 30'],
+                    choices=['all', '8'],
                     help="add the score you want to calculate"
 )
 
@@ -211,8 +211,8 @@ if __name__ == "__main__":
         df_final['final_prompt_en']=df_final['prompt_instruction']
         print(df_final)
 
-    if args.set=='10 & 30':
-        df_final_set=df_final.loc[(df_final['set_id']==10) | (df_final['set_id']==30)]
+    if args.set=='8':
+        df_final_set=df_final.loc[(df_final['dataset_id']==8) ]#| (df_final['set_id']==30)]
     else:
         df_final_set=df_final
 
