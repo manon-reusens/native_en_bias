@@ -55,6 +55,15 @@ parser.add_argument(
                     help="True if you get the gold label for the annotations using full prompt, if not gold label Then False, otherwise add_prompt_then_true",
 
 )
+parser.add_argument(
+                    "--trial",
+                    action="store",
+                    type=str,
+                    default='False',
+                    choices=["True","False"],
+                    help="True if you get the gold label for the annotations using full prompt, if not gold label Then False, otherwise add_prompt_then_true",
+
+)
 
 import openai
 import pandas as pd
@@ -98,6 +107,9 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
     if args.get_gold_label=='add_prompt_then_true':
         system_prompt1="You are a helpful assistant. You will get three main parts: a task definition, desired output, and a prompt_to_annotate. Your task is to come up with prompts that should be filled in at the placeholder <markprompt>[Your Prompt]</markprompt> in the prompt_to_annotate, such that the desired output would be outputted by a model when given the task deifnition and full prompt. Only respond with the replacement of the placeholder."
         system_prompt2="You are a helpful assistant."
+
+    if args.trial=='True':
+        system_prompt=system_prompt+' '+ task_def
 
     if args.mode=='guess_native':
         response1=client.chat.completions.create(
@@ -152,6 +164,19 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             seed=42
         )
         return prompt,response
+    elif args.trial=='True':
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": df.loc[index]['final_prompt_en']}
+            ],
+            temperature=temperature,
+            logprobs=True,
+            top_logprobs=5,
+            seed=42
+        )
+        return response
     else:
         response = client.chat.completions.create(
             model=model,
