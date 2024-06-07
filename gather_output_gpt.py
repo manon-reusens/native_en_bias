@@ -43,7 +43,7 @@ parser.add_argument(
                     action="store",
                     type=str,
                     default='standard',
-                    choices=['standard','add_all_native','add_all_non_native','guess_native','reformulate'],
+                    choices=['standard','add_all_native','add_all_non_native','guess_native','add_history'],
                     help="Give the full path of where you want to save the output file",
 )
 parser.add_argument(
@@ -61,7 +61,7 @@ parser.add_argument(
                     type=str,
                     default='False',
                     choices=["True","False"],
-                    help="True if you get the gold label for the annotations using full prompt, if not gold label Then False, otherwise add_prompt_then_true",
+                    help="True if you want to add the task definition to the system prompt.",
 
 )
 
@@ -110,6 +110,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
 
     if args.trial=='True':
         system_prompt=system_prompt+' '+ task_def
+    history=df.loc[(df.index!=index) & (df['user_id']==df.loc[index]['user_id'])].sample(n=5)['prompt_en']
 
     if args.mode=='guess_native':
         response1=client.chat.completions.create(
@@ -169,6 +170,22 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             model=model,
             messages=[
             {"role": "system", "content": system_prompt},
+            {"role": "user", "content": df.loc[index]['final_prompt_en']}
+            ],
+            temperature=temperature,
+            logprobs=True,
+            top_logprobs=5,
+            seed=42
+        )
+        return response
+    elif args.mode=='add_history':
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+            {"role": "system", "content": system_prompt},
+            {"role":"user","content": 'Here is some extra text written by the same person'+history},
+            {"role": "user", "content": task_def},
+            {"role":'assistant',"content":'Understood'},
             {"role": "user", "content": df.loc[index]['final_prompt_en']}
             ],
             temperature=temperature,
