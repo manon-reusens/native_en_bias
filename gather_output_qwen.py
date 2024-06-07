@@ -19,7 +19,7 @@ parser.add_argument(
                     action="store",
                     type=str,
                     default='Qwen1.5-0.5B-Chat',
-                    choices=['Qwen1.5-7B-Chat','Qwen1.5-0.5B-Chat','Qwen1.5-32B-Chat','Qwen1.5-110B-Chat','meta-llama/Llama-2-7b-chat-hf'],
+                    choices=['Qwen1.5-7B','Qwen1.5-7B-Chat','Qwen1.5-0.5B-Chat','Qwen1.5-32B-Chat','Qwen1.5-110B-Chat','meta-llama/Llama-2-7b-chat-hf'],
                     help="add the score you want to calculate"
 )
 
