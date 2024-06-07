@@ -110,7 +110,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
 
     if args.trial=='True':
         system_prompt=system_prompt+' '+ task_def
-    history=df.loc[(df.index!=index) & (df['user_id']==df.loc[index]['user_id'])].sample(n=5)['prompt_en']
+    
 
     if args.mode=='guess_native':
         response1=client.chat.completions.create(
@@ -179,6 +179,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
         )
         return response
     elif args.mode=='add_history':
+        history=df.loc[(df.index!=index) & (df['user_id']==df.loc[index]['user_id'])].sample(n=5)['prompt_en']
         response = client.chat.completions.create(
             model=model,
             messages=[
@@ -194,7 +195,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             top_logprobs=5,
             seed=42
         )
-        return response
+        return history, response
     else:
         response = client.chat.completions.create(
             model=model,
@@ -247,6 +248,10 @@ if __name__ == "__main__":
     elif args.mode=='standard':
         col_replies=args.model+' replies'
         col_logprobs=args.model+' logprobs'
+    elif args.mode=='add_history':
+        col_replies=args.model+' replies_history'
+        col_logprobs=args.model+' logprobs_history'
+        col_history='added_history'
     elif args.mode=='guess_native':
         col_replies=args.model+' replies_guess_native'
         col_logprobs=args.mode+' logprobs_guess_native'
@@ -289,6 +294,9 @@ if __name__ == "__main__":
                     result_guess,result=gather_answers(i,df_final_set, model=model)
                     df_final_set.at[i,col_guess]=result_guess.choices[0].message.content
                     df_final_set.at[i,col_guess_logprobs]=str(result_guess.choices[0].logprobs.content)
+                elif args.mode=='add_history':
+                    history,result=gather_answers(i,df_final_set, model=model)
+                    df_final_set.at[i,col_history]=history
                 elif args.get_gold_label=='add_prompt_then_true':
                     print('we will now gather the annotation')
                     result_prompt,result=gather_answers(i,df_final_set, model=model)
