@@ -184,6 +184,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             messages=[
             {"role": "system", "content": system_prompt},
             {"role":"user","content": 'Here is some extra text written by the same person'+history},
+            {"role":'assistant',"content":'Ok.'},
             {"role": "user", "content": task_def},
             {"role":'assistant',"content":'Understood'},
             {"role": "user", "content": df.loc[index]['final_prompt_en']}
