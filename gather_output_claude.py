@@ -38,7 +38,7 @@ parser.add_argument(
                     action="store",
                     type=str,
                     default='standard',
-                    choices=['standard','add_all_native','add_all_non_native','guess_native','reformulate'],
+                    choices=['standard','add_all_native','add_all_non_native','guess_native','add_history'],
                     help="Give the full path of where you want to save the output file",
 )
 parser.add_argument(
@@ -109,6 +109,24 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             max_tokens=4096
             )
         return response1,response2
+    elif args.mode=='add_history':
+        history=df.loc[(df.index!=index) & (df['user_id']==df.loc[index]['user_id'])].sample(n=5)['prompt_en']
+        response = client.messages.create(
+            model=model,
+            system=system_prompt,
+            messages=[
+            {"role":"user","content": 'Here is some extra text written by the same person'+history},
+            {"role":'assistant',"content":'Ok.'},
+            {"role": "user", "content": task_def},
+            {"role":'assistant',"content":'Understood'},
+            {"role": "user", "content": df.loc[index]['final_prompt_en']}
+            ],
+            temperature=temperature,
+            logprobs=True,
+            top_logprobs=5,
+            seed=42
+        )
+        return history, response
     elif args.get_gold_label=='add_prompt_then_true':
         prompt=client.messages.create(
             model=model,
@@ -178,6 +196,10 @@ if __name__ == "__main__":
     elif args.mode=='standard':
         col_replies=args.model+' replies'
         col_logprobs=args.model+' logprobs'
+    elif args.mode=='add_history':
+        col_replies=args.model+' replies_history'
+        col_logprobs=args.model+' logprobs_history'
+        col_history='added_history'
     elif args.mode=='guess_native':
         col_replies=args.model+' replies_guess_native'
         col_logprobs=args.mode+' logprobs_guess_native'
@@ -212,25 +234,27 @@ if __name__ == "__main__":
         if i%200==0:
             df_final.to_parquet(args.output_file)
         if df_final.loc[i][col_replies]==None:
-            #try:
-            if args.mode=='guess_native':
-                result_guess,result=gather_answers(i,df_final, model=model)
-                df_final.at[i,col_guess]=result_guess.content[0].text
+            try:
+                if args.mode=='guess_native':
+                    result_guess,result=gather_answers(i,df_final, model=model)
+                    df_final.at[i,col_guess]=result_guess.content[0].text
                     # df_final.at[i,col_guess_logprobs]=str(result_guess.choices[0].logprobs.content)
-            elif args.get_gold_label=='add_prompt_then_true':
-                result_prompt,result=gather_answers(i,df_final, model=model)
-                print(result_prompt.content[0].text)
-                df_final.at[i,args.model+' prompt']=str(result_prompt.content[0].text)
-            else:
-                result=gather_answers(i,df_final, model=model)
-            #print(result)
-            df_final.at[i,col_replies]=result.content[0].text
-            # df_final.at[i,args.model+' logprobs']=str(result.choices[0].logprobs.content)
-            results_full.append(result)
-            cleaned_reasults.append(result.content[0].text)
-            #except:
-                #print('we are going to sleep for a while')
-                #time.sleep(5)
+                elif args.mode=='add_history':
+                    history,result=gather_answers(i,df_final, model=model)
+                    df_final.at[i,col_history]=history
+                elif args.get_gold_label=='add_prompt_then_true':
+                    result_prompt,result=gather_answers(i,df_final, model=model)
+                    print(result_prompt.content[0].text)
+                    df_final.at[i,args.model+' prompt']=str(result_prompt.content[0].text)
+                else:
+                    result=gather_answers(i,df_final, model=model)
+                df_final.at[i,col_replies]=result.content[0].text
+                # df_final.at[i,args.model+' logprobs']=str(result.choices[0].logprobs.content)
+                results_full.append(result)
+                cleaned_reasults.append(result.content[0].text)
+            except:
+                print('we are going to sleep for a while')
+                time.sleep(5)
 
     df_final.to_parquet(args.output_file)
 

@@ -181,6 +181,10 @@ if __name__ == "__main__":
     elif args.mode=='standard':
         col_replies=args.model+' replies'
         col_logprobs=args.model+' logprobs'
+    elif args.mode=='add_history':
+        col_replies=args.model+' replies_history'
+        col_logprobs=args.model+' logprobs_history'
+        col_history='added_history'
     elif args.mode=='guess_native':
         col_replies=args.model+' replies_guess_native'
         col_logprobs=args.mode+' logprobs_guess_native'
@@ -221,6 +225,7 @@ if __name__ == "__main__":
                 df_final.at[i,col_guess]=str(guess)
             if args.mode=='add_history':
                 history,result=gather_answers(i,df_final, model=model)
+                df_final.at[i,col_history]=history
             elif args.get_gold_label=='add_prompt_then_true':
                 result_prompt,result=gather_answers(i,df_final, model=model)
                 df_final.at[i,col_annotation]=str(result_prompt)
