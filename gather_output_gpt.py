@@ -179,7 +179,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
         )
         return response
     elif args.mode=='add_history':
-        history=df.loc[(df.index!=index) & (df['user_id']==df.loc[index]['user_id'])].sample(n=5)['prompt_en']
+        history=', '.join(list(df.loc[(df.index!=index) & (df['user_id']==df.loc[index]['user_id'])].sample(n=5)['prompt_en'].values))
         response = client.chat.completions.create(
             model=model,
             messages=[
@@ -264,6 +264,9 @@ if __name__ == "__main__":
     if col_replies not in df_final_set.columns:
         df_final_set[col_replies]=None
         df_final_set[col_logprobs]=None
+    if args.mode=='add_history':
+        if col_history not in df_final_set.columns:
+            df_final_set[col_history]=None
     if args.mode=='guess_native':
         if col_guess not in df_final_set.columns:
             df_final_set[col_guess]=None

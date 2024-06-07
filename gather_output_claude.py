@@ -110,7 +110,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             )
         return response1,response2
     elif args.mode=='add_history':
-        history=df.loc[(df.index!=index) & (df['user_id']==df.loc[index]['user_id'])].sample(n=5)['prompt_en']
+        history=', '.join(list(df.loc[(df.index!=index) & (df['user_id']==df.loc[index]['user_id'])].sample(n=5)['prompt_en'].values))
         response = client.messages.create(
             model=model,
             system=system_prompt,
@@ -218,6 +218,9 @@ if __name__ == "__main__":
             col_annotation=args.model+' prompt'
             if col_annotation not in df_final.columns:
                 df_final[col_annotation]=None
+        if args.mode=='add_history':
+            if col_history not in df_final_set.columns:
+                df_final_set[col_history]=None
 
     temp_dict={0:0,1:0.7,2:0,3:0,4:0,5:0,6:0.7,7:0.7,8:0.7,9:0}
 

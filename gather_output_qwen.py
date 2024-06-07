@@ -85,7 +85,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
         messages=[{"role":"system","content":system_prompt1},
                   {"role": "user", "content": 'task definition: '+task_def+'instruction: '+df.loc[index]['final_prompt_en'].replace('</markprompt>','').replace('<markprompt>','')+' the desired output: '+df.loc[index]['req_output']}]
     elif args.mode=='add_history':
-        history=df.loc[(df.index!=index) & (df['user_id']==df.loc[index]['user_id'])].sample(n=5)['prompt_en']
+        history=', '.join(list(df.loc[(df.index!=index) & (df['user_id']==df.loc[index]['user_id'])].sample(n=5)['prompt_en'].values))
         messages=[{"role":"system","content":system_prompt},
                   {"role": "user", "content":'Here is some extra text written by the same person'+history}, {"role":"assistant","content":'Ok.'},
                     {"role": "user", "content": task_def}, {"role":"assistant","content":'Understood'},
@@ -201,6 +201,9 @@ if __name__ == "__main__":
         if col_replies not in df_final.columns:
             df_final[col_guess]=None
             df_final[col_guess_logprobs]=None
+    if args.mode=='add_history':
+        if col_history not in df_final.columns:
+            df_final[col_history]=None
 
     if args.get_gold_label=='add_prompt_then_true':
         col_annotation=args.model+' prompt'
