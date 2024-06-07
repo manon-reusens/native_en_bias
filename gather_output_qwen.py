@@ -34,7 +34,7 @@ parser.add_argument(
                     action="store",
                     type=str,
                     default='standard',
-                    choices=['standard','add_all_native','add_all_non_native','guess_native','reformulate'],
+                    choices=['standard','add_all_native','add_all_non_native','guess_native','add_history'],
                     help="Give the full path of where you want to save the output file",
 )
 parser.add_argument(
@@ -84,6 +84,13 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
     elif args.get_gold_label=='add_prompt_then_true':
         messages=[{"role":"system","content":system_prompt1},
                   {"role": "user", "content": 'task definition: '+task_def+'instruction: '+df.loc[index]['final_prompt_en'].replace('</markprompt>','').replace('<markprompt>','')+' the desired output: '+df.loc[index]['req_output']}]
+    elif args.mode=='add_history':
+        history=df.loc[(df.index!=index) & (df['user_id']==df.loc[index]['user_id'])].sample(n=5)['prompt_en']
+        messages=[{"role":"system","content":system_prompt},
+                  {"role": "user", "content":'Here is some extra text written by the same person'+history}, {"role":"assistant","content":'Ok.'},
+                    {"role": "user", "content": task_def}, {"role":"assistant","content":'Understood'},
+                    {"role":"user", "content":prompt}]
+    
     else:
         messages = [{"role":"system","content":system_prompt},
                     {"role": "user", "content": task_def}, {"role":"assistant","content":'Understood'},
@@ -105,6 +112,8 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
                   {"role": "user", "content": 'Next, execute  the following task taking this information into account. '+task_def},
                   {"role":'assistant',"content":'Understood'},
                   {"role": "user", "content": df.loc[index]['final_prompt_en']}]
+        text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        model_inputs = tokenizer([text], return_tensors="pt").to(device)
     elif args.get_gold_label=='add_prompt_then_true':
         model.generation_config.top_p=None
         model.generation_config.temperature=None
@@ -119,6 +128,8 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
                   {"role": "user", "content": task_def},
                   {"role":'assistant',"content":'Understood'},
                   {"role": "user", "content": full_prompt}]
+        text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        model_inputs = tokenizer([text], return_tensors="pt").to(device)
 
     if temperature==0:
         model.generation_config.top_p=None
@@ -137,6 +148,8 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
         return response1, response
     elif args.get_gold_label=='add_prompt_then_true':
         return response1, response
+    elif args.mode=='add_history':
+        return history, response
     else:
         return response
 
@@ -206,6 +219,8 @@ if __name__ == "__main__":
             if args.mode=='guess_native':
                 guess, result=gather_answers(i,df_final, model=model)
                 df_final.at[i,col_guess]=str(guess)
+            if args.mode=='add_history':
+                history,result=gather_answers(i,df_final, model=model)
             elif args.get_gold_label=='add_prompt_then_true':
                 result_prompt,result=gather_answers(i,df_final, model=model)
                 df_final.at[i,col_annotation]=str(result_prompt)
