@@ -219,8 +219,8 @@ if __name__ == "__main__":
             if col_annotation not in df_final.columns:
                 df_final[col_annotation]=None
         if args.mode=='add_history':
-            if col_history not in df_final_set.columns:
-                df_final_set[col_history]=None
+            if col_history not in df_final.columns:
+                df_final[col_history]=None
 
     temp_dict={0:0,1:0.7,2:0,3:0,4:0,5:0,6:0.7,7:0.7,8:0.7,9:0}
 
