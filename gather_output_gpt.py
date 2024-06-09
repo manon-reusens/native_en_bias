@@ -281,6 +281,10 @@ if __name__ == "__main__":
         col_replies=args.model+' replies_history'
         col_logprobs=args.model+' logprobs_history'
         col_history='added_history'
+    elif args.mode=='add_history_native':
+        col_replies=args.model+' replies_history_native'
+        col_logprobs=args.model+' logprobs_history_native'
+        col_history='added_history_native'
     elif args.mode=='guess_native':
         col_replies=args.model+' replies_guess_native'
         col_logprobs=args.mode+' logprobs_guess_native'
@@ -293,7 +297,7 @@ if __name__ == "__main__":
     if col_replies not in df_final_set.columns:
         df_final_set[col_replies]=None
         df_final_set[col_logprobs]=None
-    if args.mode=='add_history':
+    if (args.mode=='add_history') | (args.mode=='add_history_native'):
         if col_history not in df_final_set.columns:
             df_final_set[col_history]=None
     if args.mode=='guess_native':
