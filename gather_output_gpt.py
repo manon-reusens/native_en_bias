@@ -43,7 +43,7 @@ parser.add_argument(
                     action="store",
                     type=str,
                     default='standard',
-                    choices=['standard','add_all_native','add_all_non_native','guess_native','add_history'],
+                    choices=['standard','add_all_native','add_all_non_native','guess_native','add_history','add_history_native'],
                     help="Give the full path of where you want to save the output file",
 )
 parser.add_argument(
@@ -72,6 +72,14 @@ import os
 import numpy as np
 import time
 
+def make_groups(df):
+    df['native_or_not']=df.apply(lambda row: 'native' if ('en' in row['nat_lang']) else 'non_native' , axis=1)
+    df['strict_native_or_not']=df.apply(lambda row: 'strict native' if (row['nat_lang']=='{en}') else 'not strict native' , axis=1)
+    df['western_native_or_not']=df.apply(lambda row: 'western native' if (row['user_id'] in [159,99,104,110,193,127,457,459,481,114,445,541,542,129,562,563,338,355,254,672,70,700,709,673,687,701,17,255,588,71,356]) else 'not western native' , axis=1)
+    df['african_or_not']=df.apply(lambda row: 'african' if (row['user_id'] in [162,14,375,443,536,670,458,540]) else 'not african' , axis=1)
+    df['student_or_not']=df.apply(lambda row: 'student' if (row['user_id'] in [7,190,67,191,9,192,10,11,12,68,69,312,313,13,37,581,580,582,251,640,352,353,583,600,601,660,354,602,620,621,14,670,671,38,622,15,193,685,585,703,686,16,704,586,708,39,697,695,698,699,645,587,253,355,314,254,672,70,700,709,673,687,701,17,255,588,71,356]) else 'not student' , axis=1)
+    return df
+
 def gather_answers(index,df,model='gpt-3.5-turbo'):
     temperature=temp_dict[df.loc[index]['dataset_id']]
     #change the task definitions
@@ -91,6 +99,8 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
         task_def=df.loc[index]['task_def']+ ' Only respond with the letter indicating the most corresponding reason.'
     else:
         task_def=df.loc[index]['task_def']
+
+    df=make_groups(df)
 
     #change task definition
     # if args.mode=='guess_native':
@@ -196,6 +206,25 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             seed=42
         )
         return history, response
+    elif args.mode=='add_history_native':
+        history=', '.join(list(df.loc[(df.index!=index) & (df['native_or_not']=='native')].sample(n=5)['prompt_en'].values))
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+            {"role": "system", "content": system_prompt},
+            {"role":"user","content": 'Here is some extra text written by the same person'+history},
+            {"role":'assistant',"content":'Ok.'},
+            {"role": "user", "content": task_def},
+            {"role":'assistant',"content":'Understood'},
+            {"role": "user", "content": df.loc[index]['final_prompt_en']}
+            ],
+            temperature=temperature,
+            logprobs=True,
+            top_logprobs=5,
+            seed=42
+        )
+        return history, response
+
     else:
         response = client.chat.completions.create(
             model=model,
@@ -297,7 +326,7 @@ if __name__ == "__main__":
                     result_guess,result=gather_answers(i,df_final_set, model=model)
                     df_final_set.at[i,col_guess]=result_guess.choices[0].message.content
                     df_final_set.at[i,col_guess_logprobs]=str(result_guess.choices[0].logprobs.content)
-                elif args.mode=='add_history':
+                elif (args.mode=='add_history') | (args.mode=='add_history_native'):
                     history,result=gather_answers(i,df_final_set, model=model)
                     df_final_set.at[i,col_history]=history
                 elif args.get_gold_label=='add_prompt_then_true':
