@@ -111,6 +111,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
         return response1,response2
     elif args.mode=='add_history':
         history=', '.join(list(df.loc[(df.index!=index) & (df['user_id']==df.loc[index]['user_id'])].sample(n=5)['prompt_en'].values))
+        print(history)
         response = client.messages.create(
             model=model,
             system=system_prompt,
@@ -122,9 +123,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             {"role": "user", "content": df.loc[index]['final_prompt_en']}
             ],
             temperature=temperature,
-            logprobs=True,
-            top_logprobs=5,
-            seed=42
+            max_tokens=4096
         )
         return history, response
     elif args.get_gold_label=='add_prompt_then_true':
@@ -243,6 +242,7 @@ if __name__ == "__main__":
                     df_final.at[i,col_guess]=result_guess.content[0].text
                     # df_final.at[i,col_guess_logprobs]=str(result_guess.choices[0].logprobs.content)
                 elif args.mode=='add_history':
+                    print('we are gathering the answer')
                     history,result=gather_answers(i,df_final, model=model)
                     df_final.at[i,col_history]=history
                 elif args.get_gold_label=='add_prompt_then_true':
