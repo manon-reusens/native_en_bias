@@ -2,7 +2,6 @@ import pandas as pd
 import argparse
 import numpy as np
 import os
-os.environ['TRANSFORMERS_CACHE']='/scratch/leuven/344/vsc34470/cache/'
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers import Qwen2Model, Qwen2Config
 
