@@ -49,8 +49,6 @@ def make_groups(df):
     df['native_or_not']=df.apply(lambda row: 'native' if ('en' in row['nat_lang']) else 'non_native' , axis=1)
     df['strict_native_or_not']=df.apply(lambda row: 'strict native' if (row['nat_lang']=='{en}') else 'not strict native' , axis=1)
     df['western_native_or_not']=df.apply(lambda row: 'western native' if (row['user_id'] in [159,99,104,110,193,127,457,459,481,114,445,541,542,129,562,563,338,355,254,672,70,700,709,673,687,701,17,255,588,71,356]) else 'not western native' , axis=1)
-    # df['african_or_not']=df.apply(lambda row: 'african' if (row['user_id'] in [162,14,375,443,536,670,458,540]) else 'not african' , axis=1)
-    # df['indian_or_not']=df.apply(lambda row: 'indian' if (row['user_id'] in [192,223,10,336,575,586,697,681,220,158,97]) else 'not indian' , axis=1)
     return df
 
 def get_results(df,group,mode,scores,prompt):
@@ -60,14 +58,6 @@ def get_results(df,group,mode,scores,prompt):
         column='strict_native_or_not'
     elif group=='western':
         column='western_native_or_not'
-    elif group=='african':
-        column='african_or_not'
-    elif group=='kenyan':
-        column='kenyan_or_not'
-    elif group=='student':
-        column='student_or_not'
-    elif group=='indian':
-        column= 'indian_or_not'
 
     if scores=='classification':
         scores='accuracy'
