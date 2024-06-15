@@ -28,7 +28,7 @@ $                 --output_file "[OUTPUT_FILE]" \
 $                 --mode "standard" \
 ```
 
-To gather the gold label, --get_gold_label should be added and set to 'True' on the dataset with unique examples.
+To gather the gold label, --get_gold_label should be added and set to 'True' on the original_datasets.parquet file containing the unique examples.
 To get the results for the expetiments where the correct and wrong nativeness are added, mode should be set to 'add_all_native' or 'add_all_non_native'. To get the results for the experiments where the model first guesses about the nativeness, the mode should be set to 'guess_native'. To gather the results for Sonnet, model should be set to 'sonnet'
 
 ## Output other models
