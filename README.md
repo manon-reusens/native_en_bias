@@ -1,4 +1,4 @@
-# native_en_bias
+# Native Design Bias: Studying the Impact of English Nativeness on Language Model Performance
 
 ## Installation
 ```
