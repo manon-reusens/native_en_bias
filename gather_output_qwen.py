@@ -2,9 +2,10 @@ import pandas as pd
 import argparse
 import numpy as np
 import os
+os.environ['TRANSFORMERS_CACHE'] ='/scratch/leuven/344/vsc34470'
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers import Qwen2Model, Qwen2Config
-
+os.environ['TRANSFORMERS_CACHE'] ='/scratch/leuven/344/vsc34470'
 
 parser = argparse.ArgumentParser(description='Gather output from chatbots')
 parser.add_argument(
@@ -45,6 +46,22 @@ parser.add_argument(
                     help="True if you get the gold label for the annotations using full prompt, if not gold label Then False, otherwise add_prompt_then_true",
 
 )
+parser.add_argument(
+                    "--extra",
+                    action="store",
+                    type=str,
+                    default='user',
+                    choices=["ueser","native","non_native"],
+                    help="True if you get the gold label for the annotations using full prompt, if not gold label Then False, otherwise add_prompt_then_true",
+
+)
+def make_groups(df):
+    df['native_or_not']=df.apply(lambda row: 'native' if ('en' in row['nat_lang']) else 'non_native' , axis=1)
+    df['strict_native_or_not']=df.apply(lambda row: 'strict native' if (row['nat_lang']=='{en}') else 'not strict native' , axis=1)
+    df['western_native_or_not']=df.apply(lambda row: 'western native' if (row['user_id'] in [159,99,104,110,193,127,457,459,481,114,445,541,542,129,562,563,338,355,254,672,70,700,709,673,687,701,17,255,588,71,356]) else 'not western native' , axis=1)
+    df['african_or_not']=df.apply(lambda row: 'african' if (row['user_id'] in [162,14,375,443,536,670,458,540]) else 'not african' , axis=1)
+    df['student_or_not']=df.apply(lambda row: 'student' if (row['user_id'] in [7,190,67,191,9,192,10,11,12,68,69,312,313,13,37,581,580,582,251,640,352,353,583,600,601,660,354,602,620,621,14,670,671,38,622,15,193,685,585,703,686,16,704,586,708,39,697,695,698,699,645,587,253,355,314,254,672,70,700,709,673,687,701,17,255,588,71,356]) else 'not student' , axis=1)
+    return df
 
 def gather_answers(index,df,model='gpt-3.5-turbo'):
     temperature=temp_dict[df.loc[index]['dataset_id']]
@@ -65,6 +82,8 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
         task_def=df.loc[index]['task_def']+ ' Only respond with the letter indicating the most corresponding reason.'
     else:
         task_def=df.loc[index]['task_def']
+    
+    df=make_groups(df)
 
     if args.mode=='add_all_native':
         system_prompt="You are a helpful assistant. Respond as if you are interacting with a native English speaker"
@@ -84,7 +103,12 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
         messages=[{"role":"system","content":system_prompt1},
                   {"role": "user", "content": 'task definition: '+task_def+'instruction: '+df.loc[index]['final_prompt_en'].replace('</markprompt>','').replace('<markprompt>','')+' the desired output: '+df.loc[index]['req_output']}]
     elif args.mode=='add_history':
-        history=', '.join(list(df.loc[(df.index!=index) & (df['user_id']==df.loc[index]['user_id'])].sample(n=5)['prompt_en'].values))
+        if args.extra=='non_native':
+            history=', '.join(list(df.loc[(df.index!=index) & (df['native_or_not']=='non_native')].sample(n=5)['prompt_en'].values))#(df['user_id']==df.loc[index]['user_id'])
+        elif args.extra=='native':
+            history=', '.join(list(df.loc[(df.index!=index) & (df['native_or_not']=='native')].sample(n=5)['prompt_en'].values))
+        elif args.extra=='user':
+            history=', '.join(list(df.loc[(df.index!=index) & (df['user_id']==df.loc[index]['user_id'])].sample(n=5)['prompt_en'].values))
         messages=[{"role":"system","content":system_prompt},
                   {"role": "user", "content":'Here is some extra text written by the same person'+history}, {"role":"assistant","content":'Ok.'},
                     {"role": "user", "content": task_def}, {"role":"assistant","content":'Understood'},
