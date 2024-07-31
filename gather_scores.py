@@ -49,7 +49,7 @@ parser.add_argument(
 )
 
 def merge_datasets(df1,df_groundtruth):
-    df_groundtruth=df_groundtruth.rename(columns={args.column.replace('_history','').replace('_native','').replace('_non_native',''):'generated_req_output'})
+    df_groundtruth=df_groundtruth.rename(columns={args.column.replace('_history','').replace('_all_native','').replace('_all_non_native',''):'generated_req_output'})
     df_groundtruth=df_groundtruth.rename(columns={'gpt3.5 replies':'generated_req_output'})
     df_nec=df_groundtruth[['nat_instr_id','generated_req_output']]
     df_merged=pd.merge(df1,df_nec,on='nat_instr_id')
