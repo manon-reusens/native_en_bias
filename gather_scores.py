@@ -62,6 +62,13 @@ if __name__ == "__main__":
         df_new=pd.read_parquet(args.generated_ground_truth)
         df=merge_datasets(df,df_new)
 
+    if args.column=='Qwen1.5-7B-Chat replies_guess_native':
+        for i in df.index:
+            if len(df.at[i,'Qwen1.5-7B-Chat replies_guess_native'].split(", '"))>1:
+                df.at[i,'Qwen1.5-7B-Chat replies_guess_native']=df.at[i,'Qwen1.5-7B-Chat replies_guess_native'].split(", '")[1].replace("')","")
+            elif len(df.at[i,'Qwen1.5-7B-Chat replies_guess_native'].split(', "'))>1:
+                df.at[i,'Qwen1.5-7B-Chat replies_guess_native']=df.at[i,'Qwen1.5-7B-Chat replies_guess_native'].split(', "')[1].replace('")',"")
+
     if args.score=='all' or args.score=='accuracy':
         acc_run=Accuracy_Runner(df,args.column) 
         df=acc_run()
