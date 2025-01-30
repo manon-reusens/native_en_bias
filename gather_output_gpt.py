@@ -47,6 +47,14 @@ parser.add_argument(
                     help="Give the full path of where you want to save the output file",
 )
 parser.add_argument(
+                    "--seed",
+                    action="store",
+                    type=int,
+                    default=42,
+                    help="Add the random seed you want to use for the experiment",
+
+)
+parser.add_argument(
                     "--get_gold_label",
                     action="store",
                     type=str,
@@ -62,6 +70,15 @@ parser.add_argument(
                     default='False',
                     choices=["True","False"],
                     help="True if you want to add the task definition to the system prompt.",
+
+)
+parser.add_argument(
+                    "--extra",
+                    action="store",
+                    type=str,
+                    default='user',
+                    choices=["native","non_native","user"],
+                    help="The type of history that should be added to the chat.",
 
 )
 
@@ -131,7 +148,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             temperature=0,
             logprobs=True,
             top_logprobs=5,
-            seed=42
+            seed=args.seed
             )
         response2=client.chat.completions.create(
             model=model,
@@ -146,7 +163,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             temperature=temperature,
             logprobs=True,
             top_logprobs=5,
-            seed=42
+            seed=args.seed
         )
         return response1,response2
     elif args.get_gold_label=='add_prompt_then_true':
@@ -158,7 +175,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             {"role": "user", "content": 'task definition: '+task_def+'instruction: '+df.loc[index]['final_prompt_en'].replace('</markprompt>','').replace('<markprompt>','')+' the desired output: '+df.loc[index]['req_output']}
             ],
             temperature=0,
-            seed=42
+            seed=args.seed
         )
         text_prompt=prompt.choices[0].message.content
         print(text_prompt)
@@ -172,7 +189,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             {"role": "user", "content": full_prompt}
             ],
             temperature=temperature,
-            seed=42
+            seed=args.seed
         )
         return prompt,response
     elif args.trial=='True':
@@ -185,11 +202,16 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             temperature=temperature,
             logprobs=True,
             top_logprobs=5,
-            seed=42
+            seed=args.seed
         )
         return response
     elif args.mode=='add_history':
-        history=', '.join(list(df.loc[(df.index!=index) & (df['user_id']==df.loc[index]['user_id'])].sample(n=5)['prompt_en'].values))
+        if args.extra=='non_native':
+            history=', '.join(list(df.loc[(df.index!=index) & (df['native_or_not']=='non_native')].sample(n=5)['prompt_en'].values))#(df['user_id']==df.loc[index]['user_id'])
+        elif args.extra=='native':
+            history=', '.join(list(df.loc[(df.index!=index) & (df['native_or_not']=='native')].sample(n=5)['prompt_en'].values))
+        elif args.extra=='user':
+            history=', '.join(list(df.loc[(df.index!=index) & (df['user_id']==df.loc[index]['user_id'])].sample(n=5)['prompt_en'].values))
         response = client.chat.completions.create(
             model=model,
             messages=[
@@ -203,7 +225,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             temperature=temperature,
             logprobs=True,
             top_logprobs=5,
-            seed=42
+            seed=args.seed
         )
         return history, response
     elif args.mode=='add_history_native':
@@ -221,7 +243,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             temperature=temperature,
             logprobs=True,
             top_logprobs=5,
-            seed=42
+            seed=args.seed
         )
         return history, response
 
@@ -237,7 +259,7 @@ def gather_answers(index,df,model='gpt-3.5-turbo'):
             temperature=temperature,
             logprobs=True,
             top_logprobs=5,
-            seed=42
+            seed=args.seed
         )
         return response
 

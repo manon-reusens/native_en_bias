@@ -49,7 +49,8 @@ parser.add_argument(
 )
 
 def merge_datasets(df1,df_groundtruth):
-    df_groundtruth=df_groundtruth.rename(columns={args.column:'generated_req_output'})
+    df_groundtruth=df_groundtruth.rename(columns={args.column.replace('_history','').replace('_all_native','').replace('_all_non_native','').replace('_guess_native',''):'generated_req_output'})
+    df_groundtruth=df_groundtruth.rename(columns={'gpt3.5 replies':'generated_req_output'})
     df_nec=df_groundtruth[['nat_instr_id','generated_req_output']]
     df_merged=pd.merge(df1,df_nec,on='nat_instr_id')
     return df_merged
@@ -60,6 +61,13 @@ if __name__ == "__main__":
     if args.generated_ground_truth != None:
         df_new=pd.read_parquet(args.generated_ground_truth)
         df=merge_datasets(df,df_new)
+
+    if args.column=='Qwen1.5-7B-Chat replies_guess_native':
+        for i in df.index:
+            if len(df.at[i,'Qwen1.5-7B-Chat replies_guess_native'].split(", '"))>1:
+                df.at[i,'Qwen1.5-7B-Chat replies_guess_native']=df.at[i,'Qwen1.5-7B-Chat replies_guess_native'].split(", '")[1].replace("')","")
+            elif len(df.at[i,'Qwen1.5-7B-Chat replies_guess_native'].split(', "'))>1:
+                df.at[i,'Qwen1.5-7B-Chat replies_guess_native']=df.at[i,'Qwen1.5-7B-Chat replies_guess_native'].split(', "')[1].replace('")',"")
 
     if args.score=='all' or args.score=='accuracy':
         acc_run=Accuracy_Runner(df,args.column) 
