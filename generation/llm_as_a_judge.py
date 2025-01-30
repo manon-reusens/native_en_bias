@@ -14,7 +14,7 @@ import json
 #fluency en relevance
 
 class LLM_as_a_judge():
-    def __init__(self,df,model,eval_model,start_path,api_key=''):
+    def __init__(self,df,model,run,eval_model,start_path,api_key=''):
         #based on human annotations for CNN dailymail
         self.df=df
         self.doc_gen=''
@@ -23,6 +23,7 @@ class LLM_as_a_judge():
         self.eval_model=eval_model
         self.api_key=api_key
         self.start_path=start_path
+        self.run=run
         self.task_mapping = {
             'task1553': ('news article', 'summary'),
             'task1161': ('article', 'title'),
@@ -109,7 +110,7 @@ class LLM_as_a_judge():
 
     def gather_llama70B_results(self):
         tokenizer = AutoTokenizer.from_pretrained(self.eval_model)
-        model = LLM(model=self.eval_model, tensor_parallel_size=1,seed=42)
+        model = LLM(model=self.eval_model, tensor_parallel_size=1,seed=42,dtype='bfloat16',max_model_len=4096,download_dir='/scratch/leuven/344/vsc34470')
         sampling_params = SamplingParams(temperature=0.7, top_p=0.95, max_tokens=1024)
         # Map tasks to doc_gen and doc_comp
         self.df[['doc_gen', 'doc_comp']] = self.df['nat_instr_id'].apply(
@@ -132,17 +133,16 @@ class LLM_as_a_judge():
                     for u_prompt in user_prompts
                 ]
             )
-        tokenized_inputs = tokenizer.apply_chat_template(
-            input_list, tokenize=False, add_special_tokens=False, add_generation_prompt=True
-        )
-
-        # Generate output in batches
-        outputs = model.generate(
-            tokenized_inputs, sampling_params=sampling_params, use_tqdm=True
-        )
-
-        # Extract responses
-        response_texts = [output.outputs[0].text.strip() for output in outputs]
+        batch_size=16
+        output_list = []
+        for i in range(0, len(input_list), batch_size):
+            batch = input_list[i:i+batch_size]
+            batch_tok = [tokenizer.apply_chat_template(user_input, tokenize=False, add_special_tokens=False, add_generation_prompt=True) for user_input in batch]
+            batch_output = model.generate(batch_tok, sampling_params=sampling_params, use_tqdm=True)
+            output_list.extend([output.outputs[0].text.strip() for output in batch_output])
+            with open(f'/scratch/leuven/344/vsc34470/non-native/batches/batch{i}_everything_{self.model}-run_{self.run}-eval_model_{self.eval_model}.txt', 'w',encoding='utf8') as f:
+                f.write(str(output_list))
+            
 
         self.assign_responses(response_texts)
 
@@ -167,9 +167,9 @@ class LLM_as_a_judge():
   
 
     def __call__(self):
-        if 'llama' in self.model_eval:
+        if 'llama' in self.eval_model:
             self.gather_llama70B_results()
-        elif 'gpt' in self.model_eval:
+        elif 'gpt' in self.eval_model:
             self.gather_gpt4_results()
 
         return self.df
