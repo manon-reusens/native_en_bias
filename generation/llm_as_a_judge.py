@@ -144,7 +144,7 @@ class LLM_as_a_judge():
                 f.write(str(output_list))
             
 
-        self.assign_responses(response_texts)
+        self.assign_responses(output_list)
 
         return self.df
     
