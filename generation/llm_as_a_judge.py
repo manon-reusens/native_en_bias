@@ -35,27 +35,28 @@ class LLM_as_a_judge():
         start_prompt_one=f'You will be given a {self.doc_gen} generated based on a {self.doc_comp}.\n\nYour task is to rate the {self.doc_gen} on one metric.\n\nPlease make sure you read and understand these instructions carefully. Please keep this document open while reviewing, and refer to it as needed.'
         start_prompt_two=f'You will be given a {self.doc_gen} and a {self.doc_comp}. \n\nYour task is to rate the {self.doc_gen} on one metric.\n\nPlease make sure you read and understand these instructions carefully. Please keep this document open while reviewing, and refer to it as needed.'
             
-        fluency = f"Evaluation Criteria:\n\nFluency (1-3): the quality of the {self.doc_gen} in terms of grammar, spelling, punctuation, word choice, and sentence structure.\n\n- 1: Poor. The {self.doc_gen} has many errors that make it hard to understand or sound unnatural.\n- 2: Fair. The {self.doc_gen} has some errors that affect the clarity or smoothness of the text, but the main points are still comprehensible.\n- 3: Good. The {self.doc_gen} has few or no errors and is easy to read and follow. \n\n\nEvaluation Form (scores ONLY):\n\n- Fluency:"
+        fluency = f"Evaluation Criteria:\n\nFluency (1-3): the quality of the {self.doc_gen} in terms of grammar, spelling, punctuation, word choice, and sentence structure. Assign a score on a scale of 1 to 3 where: \n\n- 1: Poor. The {self.doc_gen} has many errors that make it hard to understand or sound unnatural.\n- 2: Fair. The {self.doc_gen} has some errors that affect the clarity or smoothness of the text, but the main points are still comprehensible.\n- 3: Good. The {self.doc_gen} has few or no errors and is easy to read and follow. \n\n\nEvaluation Form (scores ONLY):\n\n- Fluency:"
         coherence_art=f"Evaluation Criteria:\n\nCoherence (1-5) - the collective quality of all sentences. We align this dimension with the DUC quality question of structure and coherence whereby \"the {self.doc_gen} should be well-structured and well-organized. The {self.doc_gen} should not just be a heap of related information, but should build from sentence to a coherent body of information about a topic.\"\n\nEvaluation Steps:\n\n1. Read the {self.doc_comp} carefully and identify the main topic and key points.\n2. Read the {self.doc_gen} and compare it to the {self.doc_comp}. Check if the {self.doc_gen} covers the main topic and key points of the {self.doc_comp}, and if it presents them in a clear and logical order.\n3. Assign a score for coherence on a scale of 1 to 5, where 1: Very low coherence ; 2: Low coherence; 3: Mediocre coherence ; 4: High coherence ; 5: Very high coherence.\n\n\nEvaluation Form (scores ONLY):\n\n- Coherence:"
         coherence_story=f"Evaluation Criteria:\n\nCoherence (1-5) - the collective quality of all sentences. We align this dimension with the DUC quality question of structure and coherence whereby \"the sentences should be well-structured and well-organized. The sentences should not just be a heap of related information, but should build from sentence to a coherent story.\"\n\nEvaluation Steps:\n\n1. Read the {self.doc_comp} carefully and identify the main topic and key points.\n2. Read the {self.doc_gen} and compare it to the {self.doc_comp}. Check if the sentences are clear and in a logical order.\n3. Assign a score for coherence on a scale of 1 to 5, where 1: Very low coherence ; 2: Low coherence; 3: Mediocre coherence ; 4: High coherence ; 5: Very high coherence. \n\n\nEvaluation Form (scores ONLY):\n\n- Coherence:"
         coherence_paraphrase=f"Evaluation Criteria:\n\nCoherence (1-5) - The overall quality of the paraphrased sentence in terms of logical flow, structure, and alignment with the original sentence. A coherent paraphrase should preserve the meaning of the original sentence, avoid redundancy, and introduce variation without altering the main idea. The paraphrased sentence should not feel disjointed or incomplete but should read smoothly as a standalone sentence. \"\n\nEvaluation Steps:\n\n1. Read the {self.doc_comp} carefully and identify the main topic and key points. \n2. Read the {self.doc_gen} and compare it to the {self.doc_comp}. \n3. Assign a score for coherence on a scale of 1 to 5, where 1: Very low coherence ; 2: Low coherence; 3: Mediocre coherence ; 4: High coherence ; 5: Very high coherence.\n\n\nEvaluation Form (scores ONLY):\n\n- Coherence:"
         relevance = f"Evaluation Criteria:\n\nRelevance (1-5) - inclusion of important content from the {self.doc_comp}. The {self.doc_gen} should include all important information from the {self.doc_comp}. \n\nEvaluation Steps:\n\n1. Read the {self.doc_comp} and the {self.doc_gen} carefully.\n2. Compare the {self.doc_gen} to the {self.doc_comp} and identify the main points of the {self.doc_comp}.\n3. Assess how well the {self.doc_gen} covers the main points of the {self.doc_comp}, and how much irrelevant or redundant information it contains.\n4. Assign a relevance score from 1 to 5 where 1: Very low relevance ; 2: Low relevance; 3: Mediocre relevance ; 4: High relevance ; 5: Very high relevance. \n\n\nEvaluation Form (scores ONLY):\n\n- Relevance:"
         relevance_story = f"Evaluation Criteria:\n\nRelevance (1-5) - The degree to which the generated {self.doc_gen} effectively reflects the main themes and purpose of the {self.doc_comp}. A relevant closing sentence should provide a meaningful and appropriate conclusion, aligning with the tone and key points of the narrative. \n\nEvaluation Steps:\n\n1. Read the {self.doc_comp} and the {self.doc_gen} carefully.\n2. Compare the {self.doc_gen} to the {self.doc_comp} and identify the main points of the {self.doc_comp}.\n3. Assess how well the {self.doc_gen} concludes the {self.doc_comp}, and how much irrelevant or redundant information it contains.\n4. Assign a relevance score from 1 to 5 where 1: Very low relevance ; 2: Low relevance; 3: Mediocre relevance ; 4: High relevance ; 5: Very high relevance.  \n\n\nEvaluation Form (scores ONLY):\n\n- Relevance:"
         
-        prompt_fluency= start_prompt_one + f'\n\n {self.doc_gen}: \n {row[f'{self.model} replies']} \n\n {fluency}'
+        prompt_fluency= start_prompt_one + f'\n\n {self.doc_gen}: \n'+ row[self.model+' replies']+' \n\n {fluency}'
+        print(prompt_fluency)
         
-        prompt_fluency= start_prompt_one + f'\n\n {self.doc_gen}: \n {row[f'{self.model} replies']} \n\n {fluency}'
-        sub_prompt=[start_prompt_one,fluency]
-        if  'article' in self.doc_gen:
-            prompt_coherence= start_prompt_two + f'\n\n {self.doc_gen}: \n {row[f'{self.model} replies']} \n\n {self.doc_comp}: \n {row['final_prompt_en']} \n\n {coherence_art}'
-            prompt_relevance= start_prompt_two + f'\n\n {self.doc_gen}: \n {row[f'{self.model} replies']} \n\n {self.doc_comp}: \n {row['final_prompt_en']} \n\n {relevance}'
-        elif 'closing' in self.doc_gen:
-            prompt_coherence=start_prompt_two + f'\n\n {self.doc_gen}: \n {row[f'{self.model} replies']} \n\n {self.doc_comp}: \n {row['final_prompt_en']} \n\n {coherence_story}'
-            prompt_relevance= start_prompt_two + f'\n\n {self.doc_gen}: \n {row[f'{self.model} replies']} \n\n {self.doc_comp}: \n {row['final_prompt_en']} \n\n {relevance_story}'
-        elif 'paraphrased' in self.doc_gen:
-            prompt_coherence=start_prompt_two + f'\n\n {self.doc_gen}: \n {row[f'{self.model} replies']} \n\n {self.doc_comp}: \n {row['final_prompt_en']} \n\n {coherence_paraphrase}'
-            prompt_relevance= start_prompt_two + f'\n\n {self.doc_gen}: \n {row[f'{self.model} replies']} \n\n {self.doc_comp}: \n {row['final_prompt_en']} \n\n {relevance}'
         
+        if  'article' in row['doc_gen']:
+            prompt_coherence= start_prompt_two + f'\n\n {self.doc_gen}: \n'+ row[self.model+' replies']+f" \n\n {self.doc_comp}: \n {row['final_prompt_en']} \n\n {coherence_art}"
+            prompt_relevance= start_prompt_two + f"\n\n {self.doc_gen}: \n {row[f'{self.model} replies']} \n\n {self.doc_comp}: \n {row['final_prompt_en']} \n\n {relevance}"
+        elif 'closing' in row['doc_gen']:
+            prompt_coherence=start_prompt_two + f"\n\n {self.doc_gen}: \n {row[f'{self.model} replies']} \n\n {self.doc_comp}: \n {row['final_prompt_en']} \n\n {coherence_story}"
+            prompt_relevance= start_prompt_two + f"\n\n {self.doc_gen}: \n {row[f'{self.model} replies']} \n\n {self.doc_comp}: \n {row['final_prompt_en']} \n\n {relevance_story}"
+        elif 'paraphrased' in row['doc_gen']:
+            prompt_coherence=start_prompt_two + f"\n\n {self.doc_gen}: \n {row[f'{self.model} replies']} \n\n {self.doc_comp}: \n {row['final_prompt_en']} \n\n {coherence_paraphrase}"
+            prompt_relevance= start_prompt_two + f"\n\n {self.doc_gen}: \n {row[f'{self.model} replies']} \n\n {self.doc_comp}: \n {row['final_prompt_en']} \n\n {relevance}"
+        else:
+            print(row['doc_gen'])
         user_prompts=[prompt_fluency,prompt_coherence,prompt_relevance]
 
         return user_prompts
@@ -110,20 +111,29 @@ class LLM_as_a_judge():
 
     def gather_llama70B_results(self):
         tokenizer = AutoTokenizer.from_pretrained(self.eval_model)
-        model = LLM(model=self.eval_model, tensor_parallel_size=1,seed=42,dtype='bfloat16',max_model_len=4096,download_dir='/scratch/leuven/344/vsc34470')
+        model = LLM(model=self.eval_model, tensor_parallel_size=2,seed=42,dtype='bfloat16',max_model_len=4096,download_dir='/scratch/leuven/344/vsc34470')
         sampling_params = SamplingParams(temperature=0.7, top_p=0.95, max_tokens=1024)
         # Map tasks to doc_gen and doc_comp
-        self.df[['doc_gen', 'doc_comp']] = self.df['nat_instr_id'].apply(
-            lambda x: pd.Series(self.task_mapping.get(x, (None, None)))
-        )
+        values_gen=["news article","article", "paraphrased sentence", "closing sentence"]
+        values_comp=["summary", "title", "sentence", "story"]
+        conditions=[
+                self.df['nat_instr_id'].str.contains('task1553', na=False),
+                self.df['nat_instr_id'].str.contains('task1161', na=False),
+                self.df['nat_instr_id'].str.contains('task177', na=False),
+                self.df['nat_instr_id'].str.contains('task105', na=False),
+                ]
+        
+        self.df['doc_gen']=np.select(conditions,values_gen, default='other')
+        self.df['doc_comp']=np.select(conditions,values_comp, default='other')
 
         # Create user prompts for all rows
         self.df['user_prompts'] = self.df.apply(self.make_user_prompts, axis=1)
-
+        #print(self.df[self.df['doc_gen']=='other'])
         input_list = []
         for _, row in self.df.iterrows():
             system_prompt = "You will help annotating a dataset. Answer the questions as asked do not provide extra explanations, only choose one of the provided options."
             user_prompts = row['user_prompts']
+            print(user_prompts)
             input_list.extend(
                 [
                     [
@@ -140,8 +150,8 @@ class LLM_as_a_judge():
             batch_tok = [tokenizer.apply_chat_template(user_input, tokenize=False, add_special_tokens=False, add_generation_prompt=True) for user_input in batch]
             batch_output = model.generate(batch_tok, sampling_params=sampling_params, use_tqdm=True)
             output_list.extend([output.outputs[0].text.strip() for output in batch_output])
-            with open(f'/scratch/leuven/344/vsc34470/non-native/batches/batch{i}_everything_{self.model}-run_{self.run}-eval_model_{self.eval_model}.txt', 'w',encoding='utf8') as f:
-                f.write(str(output_list))
+            #with open(f'/scratch/leuven/344/vsc34470/non-native/batches/batch{i}_everything_{self.model}-run_{self.run}-eval_model_{self.eval_model.replace("/","")}.txt', 'w',encoding='utf8') as f:
+                #f.write(str(output_list))
             
 
         self.assign_responses(output_list)
@@ -167,9 +177,6 @@ class LLM_as_a_judge():
   
 
     def __call__(self):
-        if 'llama' in self.eval_model:
-            self.gather_llama70B_results()
-        elif 'gpt' in self.eval_model:
-            self.gather_gpt4_results()
-
+        self.gather_llama70B_results()
+        print(self.df)
         return self.df
