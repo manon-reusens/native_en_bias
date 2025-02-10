@@ -37,7 +37,7 @@ for the other models, similar arguments should be used, but the python file shou
 * gather_output_qwen for qwen
 
 # Get final results
-Once the chatbot's output is gathered, the final scores can be calculated as follows:
+Once the chatbot's output is gathered, the final scores can be calculated as follows for the classification tasks.
 
 ```
 $ python gather_output_claude.py \
@@ -48,3 +48,12 @@ $                 --approach 'appr2' \
 ```
 The different modes are standard, standard_no3, and dataset_id. Standard gives the overall averages. Standard_no3 gives the averages for all datasets, except the Amazonfood dataset. Dataset_id provides the average performance per dataset.
 The different approaches that can be used. Approach 1 calculates the performance using the original dataset output. Approach 2 uses the generated responses as ground truth.
+
+For the generative results using LLM-as-a-judge, the following python file should be used. The mode here is set to all_native, but can be changed to other modes as well:
+```
+$ python llm_as_a_judge_scores.py \
+$				--input_path [DIRECTORY] \
+$				--model_name [MODEL] \
+$				--run_number [RUN_NUMBER] \
+$				--mode "all_native" \
+``` 
