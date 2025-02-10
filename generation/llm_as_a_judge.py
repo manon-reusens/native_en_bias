@@ -14,7 +14,7 @@ import json
 #fluency en relevance
 
 class LLM_as_a_judge():
-    def __init__(self,df,model,run,eval_model,start_path,api_key=''):
+    def __init__(self,df,model,run,eval_model,start_path,api_key='',mode=''):
         #based on human annotations for CNN dailymail
         self.df=df
         self.doc_gen=''
@@ -30,6 +30,7 @@ class LLM_as_a_judge():
             'task177': ('paraphrased sentence', 'sentence'),
             'task105': ('closing sentence', 'story'),
         }
+        self.mode=mode
     def make_user_prompts(self,row):
         start_prompt_one=f'You will be given a '+row["doc_gen"]+" generated based on a "+row["doc_comp"]+".\n\nYour task is to rate the "+row["doc_gen"]+" on one metric.\n\nPlease make sure you read and understand these instructions carefully. Please keep this document open while reviewing, and refer to it as needed."
         start_prompt_two=f'You will be given a '+row["doc_gen"]+" and a "+row["doc_comp"]+". \n\nYour task is to rate the "+row["doc_gen"]+" on one metric.\n\nPlease make sure you read and understand these instructions carefully. Please keep this document open while reviewing, and refer to it as needed."
@@ -41,19 +42,35 @@ class LLM_as_a_judge():
         relevance = f"Evaluation Criteria:\n\nRelevance (1-5) - inclusion of important content from the "+row["doc_comp"]+". The "+row["doc_gen"]+" should include all important information from the "+row["doc_comp"]+". \n\nEvaluation Steps:\n\n1. Read the "+row["doc_comp"]+" and the "+row["doc_gen"]+" carefully.\n2. Compare the "+row["doc_gen"]+" to the "+row["doc_comp"]+" and identify the main points of the "+row["doc_comp"]+".\n3. Assess how well the "+row["doc_gen"]+" covers the main points of the "+row["doc_comp"]+", and how much irrelevant or redundant information it contains.\n4. Assign a relevance score from 1 to 5 where 1: Very low relevance ; 2: Low relevance; 3: Mediocre relevance ; 4: High relevance ; 5: Very high relevance. \n\n\nEvaluation Form (scores ONLY):\n\n- Relevance:"
         relevance_story = f"Evaluation Criteria:\n\nRelevance (1-5) - The degree to which the generated "+row["doc_gen"]+" effectively reflects the main themes and purpose of the "+row["doc_comp"]+". A relevant closing sentence should provide a meaningful and appropriate conclusion, aligning with the tone and key points of the narrative. \n\nEvaluation Steps:\n\n1. Read the "+row["doc_comp"]+" and the "+row["doc_gen"]+" carefully.\n2. Compare the "+row["doc_gen"]+" to the "+row["doc_comp"]+" and identify the main points of the "+row["doc_comp"]+".\n3. Assess how well the "+row["doc_gen"]+" concludes the "+row["doc_comp"]+", and how much irrelevant or redundant information it contains.\n4. Assign a relevance score from 1 to 5 where 1: Very low relevance ; 2: Low relevance; 3: Mediocre relevance ; 4: High relevance ; 5: Very high relevance.  \n\n\nEvaluation Form (scores ONLY):\n\n- Relevance:"
         
-        prompt_fluency= start_prompt_one + f'\n\n'+ row["doc_gen"]+': \n'+ row[self.model+' replies']+f' \n\n {fluency}'
+        if self.mode=='':
+            prompt_fluency= start_prompt_one + f'\n\n'+ row["doc_gen"]+': \n'+ row[self.model+' replies']+f' \n\n {fluency}'
+        else:
+            prompt_fluency= start_prompt_one + f'\n\n'+ row["doc_gen"]+': \n'+ row[self.model+' replies_'+self.mode]+f' \n\n {fluency}'
         print(prompt_fluency)
         
         
         if  'article' in row['doc_gen']:
-            prompt_coherence= start_prompt_two + f'\n\n'+ row["doc_gen"]+': \n'+ row[self.model+' replies']+f" \n\n "+row['doc_comp']+": \n "+row['final_prompt_en']+f" \n\n {coherence_art}"
-            prompt_relevance= start_prompt_two + f"\n\n "+row['doc_gen']+": \n "+ row[self.model+' replies']+f" \n\n "+row['doc_comp']+": \n "+row['final_prompt_en']+f" \n\n {relevance}"
+            if self.mode=='':
+                prompt_coherence= start_prompt_two + f'\n\n'+ row["doc_gen"]+': \n'+ row[self.model+' replies']+f" \n\n "+row['doc_comp']+": \n "+row['final_prompt_en']+f" \n\n {coherence_art}"
+                prompt_relevance= start_prompt_two + f"\n\n "+row['doc_gen']+": \n "+ row[self.model+' replies']+f" \n\n "+row['doc_comp']+": \n "+row['final_prompt_en']+f" \n\n {relevance}"
+            else:
+                prompt_coherence= start_prompt_two + f'\n\n'+ row["doc_gen"]+': \n'+ row[self.model+' replies_'+self.mode]+f" \n\n "+row['doc_comp']+": \n "+row['final_prompt_en']+f" \n\n {coherence_art}"
+                prompt_relevance= start_prompt_two + f"\n\n "+row['doc_gen']+": \n "+ row[self.model+' replies_'+self.mode]+f" \n\n "+row['doc_comp']+": \n "+row['final_prompt_en']+f" \n\n {relevance}"
         elif 'closing' in row['doc_gen']:
-            prompt_coherence=start_prompt_two + f"\n\n "+row['doc_gen']+": \n "+ row[self.model+' replies']+f" \n\n "+row['doc_comp']+": \n "+row['final_prompt_en']+f" \n\n {coherence_story}"
-            prompt_relevance= start_prompt_two + f"\n\n "+row['doc_gen']+": \n"+ row[self.model+' replies']+f" \n\n "+row['doc_comp']+": \n "+row['final_prompt_en']+f" \n\n {relevance_story}"
+            if self.mode=='':
+                prompt_coherence=start_prompt_two + f"\n\n "+row['doc_gen']+": \n "+ row[self.model+' replies']+f" \n\n "+row['doc_comp']+": \n "+row['final_prompt_en']+f" \n\n {coherence_story}"
+                prompt_relevance= start_prompt_two + f"\n\n "+row['doc_gen']+": \n"+ row[self.model+' replies']+f" \n\n "+row['doc_comp']+": \n "+row['final_prompt_en']+f" \n\n {relevance_story}"
+            else:
+                prompt_coherence=start_prompt_two + f"\n\n "+row['doc_gen']+": \n "+ row[self.model+' replies_'+self.mode]+f" \n\n "+row['doc_comp']+": \n "+row['final_prompt_en']+f" \n\n {coherence_story}"
+                prompt_relevance= start_prompt_two + f"\n\n "+row['doc_gen']+": \n"+ row[self.model+' replies_'+self.mode]+f" \n\n "+row['doc_comp']+": \n "+row['final_prompt_en']+f" \n\n {relevance_story}"
         elif 'paraphrased' in row['doc_gen']:
-            prompt_coherence=start_prompt_two + f"\n\n "+row['doc_gen']+": \n"+ row[self.model+' replies']+f" \n\n "+row['doc_comp']+": \n "+row['final_prompt_en']+f" \n\n {coherence_paraphrase}"
-            prompt_relevance= start_prompt_two + f"\n\n "+row['doc_gen']+": \n"+ row[self.model+' replies']+f" \n\n "+row['doc_comp']+": \n "+row['final_prompt_en']+f" \n\n {relevance}"
+            if self.mode=='':
+                prompt_coherence=start_prompt_two + f"\n\n "+row['doc_gen']+": \n"+ row[self.model+' replies']+f" \n\n "+row['doc_comp']+": \n "+row['final_prompt_en']+f" \n\n {coherence_paraphrase}"
+                prompt_relevance= start_prompt_two + f"\n\n "+row['doc_gen']+": \n"+ row[self.model+' replies']+f" \n\n "+row['doc_comp']+": \n "+row['final_prompt_en']+f" \n\n {relevance}"
+            else:
+                prompt_coherence=start_prompt_two + f"\n\n "+row['doc_gen']+": \n"+ row[self.model+' replies_'+self.mode]+f" \n\n "+row['doc_comp']+": \n "+row['final_prompt_en']+f" \n\n {coherence_paraphrase}"
+                prompt_relevance= start_prompt_two + f"\n\n "+row['doc_gen']+": \n"+ row[self.model+' replies_'+self.mode]+f" \n\n "+row['doc_comp']+": \n "+row['final_prompt_en']+f" \n\n {relevance}"
+
         else:
             print(row['doc_gen'])
         user_prompts=[prompt_fluency,prompt_coherence,prompt_relevance]
