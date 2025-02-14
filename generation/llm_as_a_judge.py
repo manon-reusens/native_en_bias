@@ -11,7 +11,6 @@ import json
 # based on https://github.com/dmg-illc/JUDGE-BENCH
 # obij Summeval json, zo wij ook prompt daarop baserensummeval
 
-#fluency en relevance
 
 class LLM_as_a_judge():
     def __init__(self,df,model,run,eval_model,start_path,api_key='',mode=''):
