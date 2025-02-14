@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
-cache_dir='/scratch/leuven/344/vsc34470'
+cache_dir=''
 os.environ['TRANSFORMERS_CACHE'] =cache_dir
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from vllm import LLM, SamplingParams
